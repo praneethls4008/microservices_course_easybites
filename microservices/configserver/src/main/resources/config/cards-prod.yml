@@ -1,0 +1,8 @@
+cards:
+  message: "Hello user!"
+  contactDetails:
+    name: "dev_PROD doe"
+    email: "dev_PROD_doe@email.com"
+  onCallSupport:
+    -(555) 555-1234
+    -(555) 556-1236

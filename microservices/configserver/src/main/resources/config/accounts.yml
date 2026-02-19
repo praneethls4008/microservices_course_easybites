@@ -1,0 +1,8 @@
+accounts:
+  message: "Hello user!"
+  contactDetails:
+    name: "dev doe"
+    email: "devdoe@email.com"
+  onCallSupport:
+    -(555) 555-1234
+    -(555) 556-1236
