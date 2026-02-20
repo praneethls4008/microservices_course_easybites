@@ -1,10 +1,15 @@
 server:
-  port: 8002
+  port: 40002
 spring:
   application:
     name: 'cards'
   config:
     import: 'optional:configserver:http://localhost:8801'
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   profiles:
     active: prod
   datasource:
@@ -25,4 +30,6 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh
+        include:
+          - refresh
+          - bus-refresh

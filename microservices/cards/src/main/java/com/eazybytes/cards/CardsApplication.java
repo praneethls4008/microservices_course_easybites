@@ -1,6 +1,7 @@
 package com.eazybytes.cards;
 
-import com.eazybytes.cards.dto.AccountsContactInfoDto;
+
+import com.eazybytes.cards.dto.CardsContactInfoDto;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -15,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 /*@ComponentScans({ @ComponentScan("com.eazybytes.cards.controller") })
 @EnableJpaRepositories("com.eazybytes.cards.repository")
 @EntityScan("com.eazybytes.cards.model")*/
-@EnableConfigurationProperties(value = {AccountsContactInfoDto.class})
+@EnableConfigurationProperties(value = {CardsContactInfoDto.class})
 @EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
 @OpenAPIDefinition(
 		info = @Info(

@@ -1,17 +1,25 @@
 spring:
   application:
     name: "configserver"
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   profiles:
     #active: native
     active: git
   cloud:
     config:
       server:
+        monitor:
+          github:
+            enabled: true
         #native:
           #search-locations:"classpath:/config"
           #search-locations: "file:///C:/Users/maddu/Desktop/STUDY/PROJECTS/JAVA/MICROSERVICES/config"
         git:
-          uri: "https://github.com/eazybytes/eazybytes-config.git"
+          uri: "https://github.com/praneethls4008/spring-config-server-easybytes.git"
           default-label: main
           timeout: 5
           clone-on-start: true

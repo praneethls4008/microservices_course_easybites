@@ -1,7 +1,7 @@
 package com.eazybytes.cards.controller;
 
 import com.eazybytes.cards.constants.CardsConstants;
-import com.eazybytes.cards.dto.AccountsContactInfoDto;
+import com.eazybytes.cards.dto.CardsContactInfoDto;
 import com.eazybytes.cards.dto.CardsDto;
 import com.eazybytes.cards.dto.ErrorResponseDto;
 import com.eazybytes.cards.dto.ResponseDto;
@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.*;
 public class CardsController {
 
     private final ICardsService iCardsService;
-    private final AccountsContactInfoDto accountsContactInfoDto;
+    private final CardsContactInfoDto accountsContactInfoDto;
 
     @Operation(
             summary = "Create Card REST API",
@@ -165,7 +165,7 @@ public class CardsController {
     }
 
     @GetMapping("/contact-info")
-    public ResponseEntity<AccountsContactInfoDto> getContactInfo() {
+    public ResponseEntity<CardsContactInfoDto> getContactInfo() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(accountsContactInfoDto);
