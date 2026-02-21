@@ -1,0 +1,92 @@
+# Note: Version is removed as it's obsolete in modern Docker
+services:
+  rabbit:
+    image: rabbitmq:4-management
+    hostname: rabbitmq
+    ports:
+      - "${PORT_RABBIT}:5672"   # Map host port to standard container port
+      - "${PORT_RABBIT_UI}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+  configserver:
+    build:
+      context: ../../configserver
+      dockerfile: Dockerfile
+    image: myapp/config-server:v1
+    container_name: configserver-ms
+    ports:
+      - "${PORT_CONFIGSERVER}:${PORT_CONFIGSERVER}"
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${PORT_CONFIGSERVER}/actuator/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+
+  accounts:
+    build:
+      context: ../../accounts
+      dockerfile: Dockerfile
+    image: myapp/accounts:v1
+    container_name: accounts-ms
+    ports:
+      - "${PORT_ACCOUNTS}:${PORT_ACCOUNTS}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "accounts"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+  cards:
+    build:
+      context: ../../cards
+      dockerfile: Dockerfile
+    image: myapp/cards:v1
+    container_name: cards-ms
+    ports:
+      - "${PORT_CARDS}:${PORT_CARDS}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "cards"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+  loans:
+    build:
+      context: ../../loans
+      dockerfile: Dockerfile
+    image: myapp/loans:v1
+    container_name: loans-ms
+    ports:
+      - "${PORT_LOANS}:${PORT_LOANS}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "loans"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+networks:
+  eazybank:
+    driver: "bridge"

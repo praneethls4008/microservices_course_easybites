@@ -1,0 +1,24 @@
+services:
+  # Base service to handle network attachment
+  network-deploy-service:
+    networks:
+      - eazybank # Connects the service to the bridge network
+
+  # Base config for services that just need RabbitMQ and Resource Limits
+  microservice-base-config:
+    extends:
+      service: network-deploy-service # Inherits the network settings
+    deploy:
+      resources:
+        limits:
+          memory: 700m # Prevents a single service from consuming all host RAM
+    environment:
+      SPRING_RABBITMQ_HOST: "rabbit" # Directs apps to the 'rabbit' service container
+
+  # Specific config for services that need to pull data from the Config Server
+  microservice-configserver-config:
+    extends:
+      service: microservice-base-config # Inherits network, limits, and RabbitMQ host
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE} # Sets the active Spring profile
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:${PORT_CONFIGSERVER}/" # Tells app where to find config
