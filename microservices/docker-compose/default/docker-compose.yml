@@ -1,20 +1,23 @@
-# Note: Version is removed as it's obsolete in modern Docker
 services:
+  # Infrastructure: RabbitMQ
   rabbit:
     image: rabbitmq:4-management
     hostname: rabbitmq
     ports:
-      - "${PORT_RABBIT}:5672"   # Map host port to standard container port
+      - "${PORT_RABBIT}:5672"
       - "${PORT_RABBIT_UI}:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
     extends:
       file: common-config.yml
       service: network-deploy-service
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
+  # Infrastructure: Config Server
   configserver:
     build:
       context: ../../configserver
@@ -28,14 +31,51 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${PORT_CONFIGSERVER}/actuator/health/readiness || exit 1"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 10
-      start_period: 15s
     extends:
       file: common-config.yml
       service: microservice-base-config
 
+  # Databases
+  accountsdb:
+    container_name: accountsdb
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: accountsdb
+    volumes:
+      - accountsdb_data:/var/lib/mysql # Maps internal DB storage to a persistent volume
+    extends:
+      file: common-config.yml
+      service: mysql-database-base-config
+
+  cardsdb:
+    container_name: cardsdb
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_DATABASE: cardsdb
+    volumes:
+      - cardsdb_data:/var/lib/mysql
+    extends:
+      file: common-config.yml
+      service: mysql-database-base-config
+
+  loansdb:
+    container_name: loansdb
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_DATABASE: loansdb
+    volumes:
+      - loansdb_data:/var/lib/mysql
+    extends:
+      file: common-config.yml
+      service: mysql-database-base-config
+
+  # Microservices
   accounts:
     build:
       context: ../../accounts
@@ -47,8 +87,11 @@ services:
     depends_on:
       configserver:
         condition: service_healthy
+      accountsdb:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "accounts"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -64,8 +107,11 @@ services:
     depends_on:
       configserver:
         condition: service_healthy
+      cardsdb:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -81,12 +127,22 @@ services:
     depends_on:
       configserver:
         condition: service_healthy
+      loansdb:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "loans"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
 
+# NEW: Define the volumes so Docker knows to manage them
+volumes:
+  accountsdb_data:
+  cardsdb_data:
+  loansdb_data:
+  rabbit_data:
+
 networks:
   eazybank:
-    driver: "bridge"
+    driver: bridge

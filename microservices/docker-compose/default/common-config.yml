@@ -1,24 +1,39 @@
 services:
-  # Base service to handle network attachment
+  # Base network configuration
   network-deploy-service:
     networks:
-      - eazybank # Connects the service to the bridge network
+      - eazybank
 
-  # Base config for services that just need RabbitMQ and Resource Limits
+  # Base config for any Spring Boot microservice
   microservice-base-config:
     extends:
-      service: network-deploy-service # Inherits the network settings
+      service: network-deploy-service
     deploy:
       resources:
         limits:
-          memory: 700m # Prevents a single service from consuming all host RAM
+          memory: 700m
     environment:
-      SPRING_RABBITMQ_HOST: "rabbit" # Directs apps to the 'rabbit' service container
+      SPRING_RABBITMQ_HOST: "rabbit"
 
-  # Specific config for services that need to pull data from the Config Server
+  # Config for services that need the Config Server
   microservice-configserver-config:
     extends:
-      service: microservice-base-config # Inherits network, limits, and RabbitMQ host
+      service: microservice-base-config
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE} # Sets the active Spring profile
-      SPRING_CONFIG_IMPORT: "configserver:http://configserver:${PORT_CONFIGSERVER}/" # Tells app where to find config
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:${PORT_CONFIGSERVER}/"
+
+  # Standard MySQL configuration
+  mysql-database-base-config:
+    image: mysql:9.0
+    extends:
+      service: network-deploy-service
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      # This command ensures the DB is fully initialized and accepting queries
+      test: [ "CMD", "mysql", "-h", "localhost", "-uroot", "-proot", "-e", "SELECT 1" ]
+      interval: 5s   # Check more frequently during startup
+      timeout: 5s
+      retries: 10
+      start_period: 20s # Give MySQL 20 seconds to do its "temporary restart" first

@@ -1,36 +1,44 @@
 server:
-  port: 40001
+  port: ${PORT_ACCOUNTS:40001}
+
 spring:
   application:
     name: 'accounts'
   config:
-    import: 'optional:configserver:http://localhost:8801'
+    # Points to the 'configserver' service name defined in docker-compose
+    import: "optional:configserver:http://configserver:${PORT_CONFIGSERVER:8801}"
   rabbitmq:
-    host: localhost
+    host: ${SPRING_RABBITMQ_HOST:localhost}
     port: 5672
-    username: guest
-    password: guest
-  profiles:
-    active: prod
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ''
-  h2:
-    console:
-      enabled: true
+    # Uses the specific URL provided by the Docker Compose environment
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/accountsdb}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        # Prevents the metadata extractor from crashing on MySQL
+        temp:
+          use_jdbc_metadata_defaults: false
+        id:
+          db_structure_naming_strategy: legacy
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  sql:
+    init:
+      mode: always
 
 management:
   endpoints:
     web:
       exposure:
-        include:
-          - refresh
-          - bus-refresh
-
+        include: "refresh,bus-refresh,health,info"
