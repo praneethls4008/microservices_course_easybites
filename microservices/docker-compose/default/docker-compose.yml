@@ -75,6 +75,29 @@ services:
       file: common-config.yml
       service: mysql-database-base-config
 
+  #Eureka service Registry & discovery
+  eurekaserver:
+    build:
+      context: ../../eurekaserver
+      dockerfile: Dockerfile
+    image: myapp/eurekaserver:v1
+    container_name: eurekaserver
+    ports:
+      - "${PORT_EUREKASERVER}:${PORT_EUREKASERVER}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${PORT_EUREKASERVER}/actuator/health/readiness || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
   # Microservices
   accounts:
     build:
@@ -88,6 +111,8 @@ services:
       configserver:
         condition: service_healthy
       accountsdb:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "accounts"
@@ -109,6 +134,8 @@ services:
         condition: service_healthy
       cardsdb:
         condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
       SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
@@ -128,6 +155,8 @@ services:
       configserver:
         condition: service_healthy
       loansdb:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "loans"
