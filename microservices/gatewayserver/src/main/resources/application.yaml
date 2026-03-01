@@ -11,7 +11,7 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
+          enabled: false #disables automatic routing , only manually added routes are redirected
           lowerCaseServiceId: true
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}

@@ -22,7 +22,7 @@ services:
     build:
       context: ../../configserver
       dockerfile: Dockerfile
-    image: myapp/config-server:v1
+    image: myapp/config-server:1.0.1
     container_name: configserver-ms
     ports:
       - "${PORT_CONFIGSERVER}:${PORT_CONFIGSERVER}"
@@ -80,7 +80,7 @@ services:
     build:
       context: ../../eurekaserver
       dockerfile: Dockerfile
-    image: myapp/eurekaserver:v1
+    image: myapp/eurekaserver:1.0.1
     container_name: eurekaserver
     ports:
       - "${PORT_EUREKASERVER}:${PORT_EUREKASERVER}"
@@ -103,7 +103,7 @@ services:
     build:
       context: ../../gatewayserver
       dockerfile: Dockerfile
-    image: myapp/gatewayserver:v1
+    image: myapp/gatewayserver:1.0.1
     container_name: gatewayserver-ms
     ports:
       - "${PORT_GATEWAYSERVER}:${PORT_GATEWAYSERVER}"
@@ -123,7 +123,7 @@ services:
     build:
       context: ../../accounts
       dockerfile: Dockerfile
-    image: myapp/accounts:v1
+    image: myapp/accounts:1.0.1
     container_name: accounts-ms
     ports:
       - "${PORT_ACCOUNTS}:${PORT_ACCOUNTS}"
@@ -145,7 +145,7 @@ services:
     build:
       context: ../../cards
       dockerfile: Dockerfile
-    image: myapp/cards:v1
+    image: myapp/cards:1.0.1
     container_name: cards-ms
     ports:
       - "${PORT_CARDS}:${PORT_CARDS}"
@@ -167,7 +167,7 @@ services:
     build:
       context: ../../loans
       dockerfile: Dockerfile
-    image: myapp/loans:v1
+    image: myapp/loans:1.0.1
     container_name: loans-ms
     ports:
       - "${PORT_LOANS}:${PORT_LOANS}"

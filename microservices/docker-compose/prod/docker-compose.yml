@@ -1,54 +1,142 @@
-# Note: Version is removed as it's obsolete in modern Docker
 services:
+  # Infrastructure: RabbitMQ
   rabbit:
     image: rabbitmq:4-management
     hostname: rabbitmq
     ports:
-      - "${PORT_RABBIT}:5672"   # Map host port to standard container port
-      - "${PORT_RABBIT_UI}:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      - "5672"
+      - "15672"
     extends:
       file: common-config.yml
       service: network-deploy-service
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
+  # Infrastructure: Config Server
   configserver:
     build:
       context: ../../configserver
       dockerfile: Dockerfile
-    image: myapp/config-server:v1
+    image: myapp/config-server:1.0.1
     container_name: configserver-ms
     ports:
-      - "${PORT_CONFIGSERVER}:${PORT_CONFIGSERVER}"
+      - "${PORT_CONFIGSERVER}"
     depends_on:
       rabbit:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${PORT_CONFIGSERVER}/actuator/health/readiness || exit 1"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 10
-      start_period: 15s
     extends:
       file: common-config.yml
       service: microservice-base-config
 
-  accounts:
-    build:
-      context: ../../accounts
-      dockerfile: Dockerfile
-    image: myapp/accounts:v1
-    container_name: accounts-ms
+  # Databases
+  accountsdb:
+    container_name: accountsdb
     ports:
-      - "${PORT_ACCOUNTS}:${PORT_ACCOUNTS}"
+      - "3306"
+    environment:
+      MYSQL_DATABASE: accountsdb
+    volumes:
+      - accountsdb_data:/var/lib/mysql # Maps internal DB storage to a persistent volume
+    extends:
+      file: common-config.yml
+      service: mysql-database-base-config
+
+  cardsdb:
+    container_name: cardsdb
+    ports:
+      - "3306"
+    environment:
+      MYSQL_DATABASE: cardsdb
+    volumes:
+      - cardsdb_data:/var/lib/mysql
+    extends:
+      file: common-config.yml
+      service: mysql-database-base-config
+
+  loansdb:
+    container_name: loansdb
+    ports:
+      - "3306"
+    environment:
+      MYSQL_DATABASE: loansdb
+    volumes:
+      - loansdb_data:/var/lib/mysql
+    extends:
+      file: common-config.yml
+      service: mysql-database-base-config
+
+  #Eureka service Registry & discovery
+  eurekaserver:
+    build:
+      context: ../../eurekaserver
+      dockerfile: Dockerfile
+    image: myapp/eurekaserver:1.0.1
+    container_name: eurekaserver
+    ports:
+      - "${PORT_EUREKASERVER}"
     depends_on:
       configserver:
         condition: service_healthy
     environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${PORT_EUREKASERVER}/actuator/health/readiness || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+  #Gateway Server
+  gatewayserver:
+    build:
+      context: ../../gatewayserver
+      dockerfile: Dockerfile
+    image: myapp/gatewayserver:1.0.1
+    container_name: gatewayserver-ms
+    ports:
+      - "${PORT_GATEWAYSERVER}:${PORT_GATEWAYSERVER}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "gatewayserver"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+  # Microservices
+  accounts:
+    build:
+      context: ../../accounts
+      dockerfile: Dockerfile
+    image: myapp/accounts:1.0.1
+    container_name: accounts-ms
+    ports:
+      - "${PORT_ACCOUNTS}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      accountsdb:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
+    environment:
       SPRING_APPLICATION_NAME: "accounts"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -57,15 +145,20 @@ services:
     build:
       context: ../../cards
       dockerfile: Dockerfile
-    image: myapp/cards:v1
+    image: myapp/cards:1.0.1
     container_name: cards-ms
     ports:
-      - "${PORT_CARDS}:${PORT_CARDS}"
+      - "${PORT_CARDS}"
     depends_on:
       configserver:
         condition: service_healthy
+      cardsdb:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -74,19 +167,31 @@ services:
     build:
       context: ../../loans
       dockerfile: Dockerfile
-    image: myapp/loans:v1
+    image: myapp/loans:1.0.1
     container_name: loans-ms
     ports:
-      - "${PORT_LOANS}:${PORT_LOANS}"
+      - "${PORT_LOANS}"
     depends_on:
       configserver:
         condition: service_healthy
+      loansdb:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "loans"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
 
+# NEW: Define the volumes so Docker knows to manage them
+volumes:
+  accountsdb_data:
+  cardsdb_data:
+  loansdb_data:
+  rabbit_data:
+
 networks:
   eazybank:
-    driver: "bridge"
+    driver: bridge
