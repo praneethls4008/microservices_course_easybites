@@ -1,0 +1,48 @@
+server:
+  port: ${PORT_GATEWAYSERVER:8901}
+
+spring:
+  application:
+    name: gatewayserver
+  config:
+    # Points to the 'configserver' service name defined in docker-compose
+    import: "optional:configserver:http://configserver:${PORT_CONFIGSERVER:8801}"
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "env,refresh,bus-refresh,health,info,gateway"
+  endpoint:
+    gateway:
+      enabled: true
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8070/eureka/}
+
+info:
+  app:
+    name: "gateway-server"
+    description: "API Gateway/ Edge Server"
+    version: "1.0.0"
