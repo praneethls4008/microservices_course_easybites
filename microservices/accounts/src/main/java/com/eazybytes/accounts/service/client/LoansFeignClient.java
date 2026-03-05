@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 //eureka regstered name
-@FeignClient("loans")
+@FeignClient(name="loans", fallback = LoansFallback.class)
 public interface LoansFeignClient {
 
     @GetMapping("/api/fetch")

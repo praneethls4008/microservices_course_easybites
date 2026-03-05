@@ -13,15 +13,27 @@ public class GatewayConfig {
         return routeLocatorBuilder.routes()
                 .route("accounts_route", r -> r
                         .path("/accounts/**")
-                        .filters(f -> f.rewritePath("/accounts/(?<segment>.*)", "/${segment}"))
+                        .filters(f -> f.rewritePath("/accounts/(?<segment>.*)", "/${segment}")
+                                .circuitBreaker(config -> config.setName("accountsCircuitBreaker")
+                                        .setFallbackUri("forward:/default")
+                                )
+                        )
                         .uri("lb://ACCOUNTS"))
                 .route("cards_route", r -> r
                         .path("/cards/**")
-                        .filters(f -> f.rewritePath("/cards/(?<segment>.*)", "/${segment}"))
+                        .filters(f -> f.rewritePath("/cards/(?<segment>.*)", "/${segment}")
+//                                .circuitBreaker(config -> config.setName("cardsCircuitBreaker")
+//                                        .setFallbackUri("forward:/default")
+//                                )
+                        )
                         .uri("lb://CARDS"))
                 .route("loans_route", r -> r
                         .path("/loans/**")
-                        .filters(f -> f.rewritePath("/loans/(?<segment>.*)", "/${segment}"))
+                        .filters(f -> f.rewritePath("/loans/(?<segment>.*)", "/${segment}")
+//                                .circuitBreaker(config -> config.setName("loansCircuitBreaker")
+//                                        .setFallbackUri("forward:/default")
+//                                )
+                        )
                         .uri("lb://LOANS"))
                 .build();
     }

@@ -32,6 +32,10 @@ spring:
         id:
           db_structure_naming_strategy: legacy
         dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 
   sql:
     init:

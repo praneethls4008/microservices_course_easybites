@@ -23,13 +23,18 @@ management:
   endpoints:
     web:
       exposure:
-        include: "env,refresh,bus-refresh,health,info,gateway"
+        include: "*"
   endpoint:
+    health:
+      show-details: always
     gateway:
       enabled: true
       access: unrestricted
   info:
     env:
+      enabled: true
+  health:
+    circuitbreakers:
       enabled: true
 
 eureka:
@@ -46,3 +51,12 @@ info:
     name: "gateway-server"
     description: "API Gateway/ Edge Server"
     version: "1.0.0"
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      permittedNumberPfCallsInHalfOpenState: 2
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+      registerHealthIndicator: true
