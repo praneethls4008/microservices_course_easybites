@@ -1,11 +1,11 @@
 package com.eazybytes.accounts.controller;
 
 import com.eazybytes.accounts.constants.AccountsConstants;
-import com.eazybytes.accounts.dto.AccountsContactInfoDto;
-import com.eazybytes.accounts.dto.CustomerDto;
-import com.eazybytes.accounts.dto.ErrorResponseDto;
-import com.eazybytes.accounts.dto.ResponseDto;
+import com.eazybytes.accounts.dto.*;
 import com.eazybytes.accounts.service.IAccountsService;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +23,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Eazy Bytes
@@ -63,6 +68,7 @@ public class AccountsController {
             )
     }
     )
+
     @PostMapping("/create")
     public ResponseEntity<ResponseDto> createAccount(@Valid @RequestBody CustomerDto customerDto) {
         iAccountsService.createAccount(customerDto);
@@ -89,13 +95,25 @@ public class AccountsController {
             )
     }
     )
+
+    @Bulkhead(name = "fetchDataBulkhead", type = Bulkhead.Type.THREADPOOL, fallbackMethod = "fetchDataBulkheadFallback")
     @GetMapping("/fetch")
-    public ResponseEntity<CustomerDto> fetchAccountDetails(@RequestParam
+    public CompletableFuture<ResponseEntity<CustomerDto>> fetchAccountDetails(@RequestParam
                                                                @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                String mobileNumber) {
-        CustomerDto customerDto = iAccountsService.fetchAccount(mobileNumber);
-        return ResponseEntity.status(HttpStatus.OK).body(customerDto);
+
+        return CompletableFuture.supplyAsync(() -> {
+            CustomerDto customerDto = iAccountsService.fetchAccount(mobileNumber);
+            return ResponseEntity.status(HttpStatus.OK).body(customerDto);
+        });
     }
+    public CompletableFuture<ResponseEntity<CustomerDto>> fetchDataBulkheadFallback(String mobileNumber, Throwable t) {
+
+        return CompletableFuture.completedFuture(
+                ResponseEntity.status(org.springframework.http.HttpStatus.OK).body(null)
+        );
+    }
+
 
     @Operation(
             summary = "Update Account Details REST API",
@@ -171,11 +189,40 @@ public class AccountsController {
         }
     }
 
+    @RateLimiter(name = "contactInfo", fallbackMethod = "contactInfoRateLimitFallback")
+    @Retry(name= "contactInfo", fallbackMethod = "contactInfoFallback")
     @GetMapping("/contact-info")
     public ResponseEntity<AccountsContactInfoDto> getContactInfo() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(accountsContactInfoDto);
+    }
+
+    public ResponseEntity<AccountsContactInfoDto> contactInfoRateLimitFallback(Throwable throwable){
+        AccountsContactInfoDto accountsContactInfoDtoFallbackObj = new AccountsContactInfoDto();
+        accountsContactInfoDtoFallbackObj.setMessage("This is Accounts Ratelimit fallback Message value");
+        Map<String, String> contactDetails = new HashMap<>();
+        contactDetails.put("phNo", "8989898988");
+        contactDetails.put("landline", "0144-43");
+        accountsContactInfoDtoFallbackObj.setContactDetails(contactDetails);
+        accountsContactInfoDtoFallbackObj.setOnCallSupport(List.of("8383838383", "64636464646"));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(accountsContactInfoDtoFallbackObj);
+    }
+
+    //fallback method for contactInfo
+    public ResponseEntity<AccountsContactInfoDto> contactInfoFallback(Throwable throwable){
+        AccountsContactInfoDto accountsContactInfoDtoFallbackObj = new AccountsContactInfoDto();
+        accountsContactInfoDtoFallbackObj.setMessage("This is Accounts Retry fallback Message value");
+        Map<String, String> contactDetails = new HashMap<>();
+        contactDetails.put("phNo", "8989898988");
+        contactDetails.put("landline", "0144-43");
+        accountsContactInfoDtoFallbackObj.setContactDetails(contactDetails);
+        accountsContactInfoDtoFallbackObj.setOnCallSupport(List.of("8383838383", "64636464646"));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(accountsContactInfoDtoFallbackObj);
     }
 
 

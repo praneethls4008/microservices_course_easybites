@@ -2,7 +2,7 @@ services:
   # Base network configuration
   network-deploy-service:
     networks:
-      - eazybank
+      - observability-net
 
   # Base config for any Spring Boot microservice
   microservice-base-config:

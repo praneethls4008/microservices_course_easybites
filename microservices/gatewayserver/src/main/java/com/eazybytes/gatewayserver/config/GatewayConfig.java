@@ -1,15 +1,26 @@
 package com.eazybytes.gatewayserver.config;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JConfigBuilder;
+import org.springframework.cloud.client.circuitbreaker.Customizer;
+import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
+import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 @Configuration
 public class GatewayConfig {
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder){
+    public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder, RedisRateLimiter redisRateLimiter, KeyResolver keyResolver){
         return routeLocatorBuilder.routes()
                 .route("accounts_route", r -> r
                         .path("/accounts/**")
@@ -19,6 +30,8 @@ public class GatewayConfig {
                                 )
                         )
                         .uri("lb://ACCOUNTS"))
+
+
                 .route("cards_route", r -> r
                         .path("/cards/**")
                         .filters(f -> f.rewritePath("/cards/(?<segment>.*)", "/${segment}")
@@ -27,14 +40,53 @@ public class GatewayConfig {
 //                                )
                         )
                         .uri("lb://CARDS"))
+
                 .route("loans_route", r -> r
                         .path("/loans/**")
                         .filters(f -> f.rewritePath("/loans/(?<segment>.*)", "/${segment}")
-//                                .circuitBreaker(config -> config.setName("loansCircuitBreaker")
-//                                        .setFallbackUri("forward:/default")
-//                                )
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setMethods(HttpMethod.GET)
+                                        .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)
+                                )
+                                .requestRateLimiter(config -> config
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(keyResolver)
+                                )
                         )
                         .uri("lb://LOANS"))
                 .build();
     }
+
+    //default circuit breaker timeout config
+
+    @Bean
+    public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
+        return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
+                // 1. Configure the Circuit Breaker logic (thresholds, window size, etc.)
+                .circuitBreakerConfig(CircuitBreakerConfig.custom()
+                        .slidingWindowSize(10)
+                        .failureRateThreshold(50)
+                        .waitDurationInOpenState(Duration.ofSeconds(10))
+                        .build())
+                // 2. Configure the Time Limiter (Timeout duration)
+                .timeLimiterConfig(TimeLimiterConfig.custom()
+                        .timeoutDuration(Duration.ofSeconds(4))
+                        .build())
+                .build());
+    }
+
+
+    @Bean
+    public RedisRateLimiter redisRateLimiter() {
+        return new RedisRateLimiter(1, 1);
+    }
+
+    @Bean
+    public KeyResolver userKeyResolver() {
+        return exchange -> Mono.justOrEmpty(
+                exchange.getRequest().getHeaders().getFirst("user")
+        ).defaultIfEmpty("anonymous");
+    }
+
 }

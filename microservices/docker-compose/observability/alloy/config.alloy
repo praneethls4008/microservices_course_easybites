@@ -1,0 +1,47 @@
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// 1. Create the 'container_name' and 'image' labels here
+discovery.relabel "log_labels" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container_name"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_image"]
+    target_label  = "image"
+  }
+}
+
+loki.source.docker "containers" {
+  host    = "unix:///var/run/docker.sock"
+  // 2. Use the OUTPUT of the relabel component
+  targets = discovery.relabel.log_labels.output
+
+  forward_to = [loki.process.docker_logs.receiver]
+}
+
+loki.process "docker_logs" {
+  stage.docker {}
+
+  // Labels from discovery.relabel are already attached to the stream.
+  // Use stage.labels only if you need to extract values from the log line itself.
+  stage.static_labels {
+    values = {
+      job = "docker",
+    }
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

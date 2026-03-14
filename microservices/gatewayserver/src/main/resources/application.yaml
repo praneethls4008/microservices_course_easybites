@@ -13,6 +13,15 @@ spring:
         locator:
           enabled: false #disables automatic routing , only manually added routes are redirected
           lowerCaseServiceId: true
+      httpclient:
+        connect-timeout: 1000
+        response-timeout: 12s
+  data:
+    redis:
+      connect-timeout: 2s
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      timeout: 1s
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}
     port: 5672

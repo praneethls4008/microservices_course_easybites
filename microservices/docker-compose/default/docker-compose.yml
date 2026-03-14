@@ -17,6 +17,23 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis-ms
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
   # Infrastructure: Config Server
   configserver:
     build:
@@ -112,8 +129,12 @@ services:
         condition: service_healthy
       eurekaserver: # Ensure Eureka is at least starting
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "gatewayserver"
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -191,7 +212,8 @@ volumes:
   cardsdb_data:
   loansdb_data:
   rabbit_data:
+  redis_data:
 
 networks:
-  eazybank:
-    driver: bridge
+  observability-net:
+    external: true
