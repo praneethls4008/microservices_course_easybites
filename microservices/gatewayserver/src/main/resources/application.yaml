@@ -42,6 +42,9 @@ management:
   info:
     env:
       enabled: true
+  metrics:
+    logs:
+      application: ${spring.application.name}
   health:
     circuitbreakers:
       enabled: true

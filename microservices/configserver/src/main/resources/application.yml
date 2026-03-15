@@ -9,6 +9,9 @@ spring:
   profiles:
     #active: native
     active: git
+  metrics:
+    logs:
+      application: ${spring.application.name}
   cloud:
     config:
       server:
@@ -29,7 +32,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: bus-refresh, health, info, metrics
+        include: "*"
   health:
     readiness-state:
       enabled: true

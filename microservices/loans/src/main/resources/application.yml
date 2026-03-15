@@ -44,13 +44,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: "refresh,bus-refresh,health,info"
+        include: "*"
   endpoint:
     shutdown:
       access: unrestricted
   info:
     env:
       enabled: true
+  metrics:
+    logs:
+      application: ${spring.application.name}
 
 eureka:
   instance:

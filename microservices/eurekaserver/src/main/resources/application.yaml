@@ -4,12 +4,14 @@ spring:
 
   config:
     import: "optional:configserver:http://configserver:${PORT_CONFIGSERVER:8801}"
-
+  metrics:
+    logs:
+      application: ${spring.application.name}
 management:
   endpoints:
     web:
       exposure:
-        include: bus-refresh, health, info, metrics
+        include: "*"
   health:
     readiness-state:
       enabled: true
