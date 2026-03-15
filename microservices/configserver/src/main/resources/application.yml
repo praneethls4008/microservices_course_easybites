@@ -28,6 +28,15 @@ spring:
           clone-on-start: true
           force-pull: true
 
+logging:
+  level:
+    com:
+      eazybytes:
+        accounts: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+
 management:
   endpoints:
     web:

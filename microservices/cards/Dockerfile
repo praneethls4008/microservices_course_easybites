@@ -1,27 +1,33 @@
 # --- Stage 1: Build Stage ---
-# Use Maven with JDK 21 for the compilation phase
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# 1. Copy pom.xml to cache dependencies (Efficiency Tip!)
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
+# Download OpenTelemetry agent
+RUN curl -L -o opentelemetry-javaagent.jar \
+https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.22.0/opentelemetry-javaagent.jar
+
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# 2. Copy source code and build the application
 COPY src ./src
 RUN mvn clean package -DskipTests
 
+
 # --- Stage 2: Runtime Stage ---
-# Use the lightweight JRE 21 image for the final container
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# 3. Create a non-root user for security (Interview Gold Star!)
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+RUN mkdir -p /app/libs \
+ && addgroup -S spring \
+ && adduser -S spring -G spring
 
-# 4. Copy the JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/opentelemetry-javaagent.jar /app/libs/opentelemetry-javaagent.jar
 
-# 5. Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+RUN chown -R spring:spring /app
+
+USER spring:spring
+ENTRYPOINT ["java","-jar","app.jar"]
