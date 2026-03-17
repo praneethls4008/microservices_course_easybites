@@ -21,9 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author Eazy Bytes
+ * @author Praneeth
  */
 
 @Tag(
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class CardsController {
 
     private final ICardsService iCardsService;
@@ -61,10 +63,12 @@ public class CardsController {
     public ResponseEntity<ResponseDto> createCard(@Valid @RequestParam
                                                       @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                       String mobileNumber) {
+        log.info("Action: CreateCard | Status: IN_PROGRESS | Mobile: {}", mobileNumber);
         iCardsService.createCard(mobileNumber);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(new ResponseDto(CardsConstants.STATUS_201, CardsConstants.MESSAGE_201));
+        log.info("Action: CreateCard | Status: SUCCESS | Mobile: {}", mobileNumber);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ResponseDto(CardsConstants.STATUS_201, CardsConstants.MESSAGE_201));
     }
 
     @Operation(
@@ -88,7 +92,9 @@ public class CardsController {
     public ResponseEntity<CardsDto> fetchCardDetails(@RequestParam
                                                                @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                String mobileNumber) {
+        log.info("Action: FetchCard | Status: IN_PROGRESS | Mobile: {}", mobileNumber);
         CardsDto cardsDto = iCardsService.fetchCard(mobileNumber);
+        log.info("Action: FetchCard | Status: SUCCESS | Mobile: {}", mobileNumber);
         return ResponseEntity.status(HttpStatus.OK).body(cardsDto);
     }
 
@@ -115,12 +121,15 @@ public class CardsController {
         })
     @PutMapping("/update")
     public ResponseEntity<ResponseDto> updateCardDetails(@Valid @RequestBody CardsDto cardsDto) {
+        log.info("Action: UpdateCard | Status: IN_PROGRESS | CardNo: {}", cardsDto.getCardNumber());
         boolean isUpdated = iCardsService.updateCard(cardsDto);
-        if(isUpdated) {
+        if (isUpdated) {
+            log.info("Action: UpdateCard | Status: SUCCESS | CardNo: {}", cardsDto.getCardNumber());
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseDto(CardsConstants.STATUS_200, CardsConstants.MESSAGE_200));
-        }else{
+        } else {
+            log.error("Action: UpdateCard | Status: FAILED | CardNo: {}", cardsDto.getCardNumber());
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseDto(CardsConstants.STATUS_417, CardsConstants.MESSAGE_417_UPDATE));
@@ -152,12 +161,15 @@ public class CardsController {
     public ResponseEntity<ResponseDto> deleteCardDetails(@RequestParam
                                                                 @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                 String mobileNumber) {
+        log.info("Action: DeleteCard | Status: IN_PROGRESS | Mobile: {}", mobileNumber);
         boolean isDeleted = iCardsService.deleteCard(mobileNumber);
         if(isDeleted) {
+            log.info("Action: DeleteCard | Status: SUCCESS | Mobile: {}", mobileNumber);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseDto(CardsConstants.STATUS_200, CardsConstants.MESSAGE_200));
         }else{
+            log.error("Action: DeleteCard | Status: FAILED | Mobile: {}", mobileNumber);
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseDto(CardsConstants.STATUS_417, CardsConstants.MESSAGE_417_DELETE));
@@ -166,9 +178,9 @@ public class CardsController {
 
     @GetMapping("/contact-info")
     public ResponseEntity<CardsContactInfoDto> getContactInfo() {
+        log.debug("Action: GetContactInfo | Status: TRIGGERED");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(accountsContactInfoDto);
     }
-
 }

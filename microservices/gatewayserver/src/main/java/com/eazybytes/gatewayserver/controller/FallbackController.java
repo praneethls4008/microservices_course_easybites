@@ -16,12 +16,22 @@ public class FallbackController {
     @RequestMapping("/default")
     public Mono<String> defaultFallback(ServerWebExchange exchange) {
 
+        // 1. Extract Correlation ID from headers for traceability
+        String correlationId = exchange.getRequest().getHeaders().getFirst("eazybank-correlation-id");
+
+        // 2. Identify which path actually failed
+        String originalUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ORIGINAL_REQUEST_URL_ATTR).toString();
+
         Throwable error = exchange.getAttribute(
                 ServerWebExchangeUtils.CIRCUITBREAKER_EXECUTION_EXCEPTION_ATTR
         );
 
+        // 3. Log with structured context
         if (error != null) {
-            log.error("Fallback triggered due to: {}", error.getClass().getName(), error);
+            log.error("Circuit Breaker Fallback | CorrelationID: {} | Path: {} | Reason: {} | Message: {}",
+                    correlationId, originalUri, error.getClass().getSimpleName(), error.getMessage());
+        } else {
+            log.warn("Fallback triggered with no specific exception | Path: {}", originalUri);
         }
 
         return Mono.just("An error occurred. Please try after some time or contact support team!");

@@ -20,9 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author Eazy Bytes
+ * @author Praneeth
  */
 
 @Tag(
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class LoansController {
 
     private final ILoansService iLoansService;
@@ -60,7 +62,12 @@ public class LoansController {
     public ResponseEntity<ResponseDto> createLoan(@RequestParam
                                                       @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                       String mobileNumber) {
+        // Log starts with [loans, trace_id, span_id] via Logback pattern
+        log.info("Action: CreateLoan | Status: IN_PROGRESS | Mobile: {}", mobileNumber);
+
         iLoansService.createLoan(mobileNumber);
+
+        log.info("Action: CreateLoan | Status: SUCCESS | Mobile: {}", mobileNumber);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDto(LoansConstants.STATUS_201, LoansConstants.MESSAGE_201));
@@ -88,7 +95,11 @@ public class LoansController {
     public ResponseEntity<LoansDto> fetchLoanDetails(@RequestParam
                                                                @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                String mobileNumber) {
+        log.info("Action: FetchLoan | Status: IN_PROGRESS | Mobile: {}", mobileNumber);
+
         LoansDto loansDto = iLoansService.fetchLoan(mobileNumber);
+
+        log.info("Action: FetchLoan | Status: SUCCESS | Mobile: {}", mobileNumber);
         return ResponseEntity.status(HttpStatus.OK).body(loansDto);
     }
 
@@ -116,12 +127,16 @@ public class LoansController {
     )
     @PutMapping("/update")
     public ResponseEntity<ResponseDto> updateLoanDetails(@Valid @RequestBody LoansDto loansDto) {
+        log.info("Action: UpdateLoan | Status: IN_PROGRESS | LoanNo: {}", loansDto.getLoanNumber());
+
         boolean isUpdated = iLoansService.updateLoan(loansDto);
         if(isUpdated) {
+            log.info("Action: UpdateLoan | Status: SUCCESS | LoanNo: {}", loansDto.getLoanNumber());
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseDto(LoansConstants.STATUS_200, LoansConstants.MESSAGE_200));
-        }else{
+        } else {
+            log.error("Action: UpdateLoan | Status: FAILED | LoanNo: {} | Reason: Record Not Found", loansDto.getLoanNumber());
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseDto(LoansConstants.STATUS_417, LoansConstants.MESSAGE_417_UPDATE));
@@ -154,12 +169,16 @@ public class LoansController {
     public ResponseEntity<ResponseDto> deleteLoanDetails(@RequestParam
                                                                 @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                 String mobileNumber) {
+        log.info("Action: DeleteLoan | Status: IN_PROGRESS | Mobile: {}", mobileNumber);
+
         boolean isDeleted = iLoansService.deleteLoan(mobileNumber);
         if(isDeleted) {
+            log.info("Action: DeleteLoan | Status: SUCCESS | Mobile: {}", mobileNumber);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseDto(LoansConstants.STATUS_200, LoansConstants.MESSAGE_200));
-        }else{
+        } else {
+            log.error("Action: DeleteLoan | Status: FAILED | Mobile: {}", mobileNumber);
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseDto(LoansConstants.STATUS_417, LoansConstants.MESSAGE_417_DELETE));
@@ -168,9 +187,8 @@ public class LoansController {
 
     @GetMapping("/contact-info")
     public ResponseEntity<LoansContactInfoDto> getContactInfo() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(accountsContactInfoDto);
+        log.debug("Action: GetContactInfo | Status: TRIGGERED");
+        return ResponseEntity.status(HttpStatus.OK).body(loansContactInfoDto);
     }
 
 }
