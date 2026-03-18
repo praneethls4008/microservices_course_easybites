@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LoansController {
 
     private final ILoansService iLoansService;
-    private final LoansContactInfoDto accountsContactInfoDto;
+    private final LoansContactInfoDto loansContactInfoDto;
 
     @Operation(
             summary = "Create Loan REST API",

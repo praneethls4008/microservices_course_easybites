@@ -1,5 +1,3 @@
-version: "1.0"
-
 services:
 
   loki:
@@ -39,7 +37,7 @@ services:
   tempo:
     image: grafana/tempo:2.9.0
     container_name: tempo
-    command: -config.file /etc/tempo-config.yml
+    command:  ["-config.file=/etc/tempo-config.yml"]
     ports:
       - "3110:3100"
       - "4318:4318"
@@ -51,6 +49,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    user: "472" # Ensure it runs as the correct user
     ports:
       - "3000:3000"
     environment:
@@ -62,6 +61,7 @@ services:
     depends_on:
       - prometheus
       - loki
+      - tempo
     networks:
       - observability-net
 

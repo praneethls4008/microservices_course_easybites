@@ -9,6 +9,7 @@ import com.eazybytes.loans.mapper.LoansMapper;
 import com.eazybytes.loans.repository.LoansRepository;
 import com.eazybytes.loans.service.ILoansService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.Random;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class LoansServiceImpl implements ILoansService {
 
     private LoansRepository loansRepository;
@@ -25,11 +27,17 @@ public class LoansServiceImpl implements ILoansService {
      */
     @Override
     public void createLoan(String mobileNumber) {
-        Optional<Loans> optionalLoans= loansRepository.findByMobileNumber(mobileNumber);
+        log.debug("Logic: CreateLoan | Checking status for Mobile: {}", mobileNumber);
+
+        Optional<Loans> optionalLoans = loansRepository.findByMobileNumber(mobileNumber);
         if(optionalLoans.isPresent()){
-            throw new LoanAlreadyExistsException("Loan already registered with given mobileNumber "+mobileNumber);
+            log.warn("Logic: CreateLoan | Failure: Duplicate entry found | Mobile: {}", mobileNumber);
+            throw new LoanAlreadyExistsException("Loan already registered with given mobileNumber " + mobileNumber);
         }
-        loansRepository.save(createNewLoan(mobileNumber));
+
+        Loans newLoan = createNewLoan(mobileNumber);
+        loansRepository.save(newLoan);
+        log.info("Logic: CreateLoan | Success: LoanNo: {} assigned to Mobile: {}", newLoan.getLoanNumber(), mobileNumber);
     }
 
     /**
@@ -37,6 +45,7 @@ public class LoansServiceImpl implements ILoansService {
      * @return the new loan details
      */
     private Loans createNewLoan(String mobileNumber) {
+        log.trace("Logic: createNewLoan | Initializing Home Loan parameters for Mobile: {}", mobileNumber);
         Loans newLoan = new Loans();
         long randomLoanNumber = 100000000000L + new Random().nextInt(900000000);
         newLoan.setLoanNumber(Long.toString(randomLoanNumber));
@@ -55,8 +64,13 @@ public class LoansServiceImpl implements ILoansService {
      */
     @Override
     public LoansDto fetchLoan(String mobileNumber) {
+        log.debug("Logic: FetchLoan | Database query for Mobile: {}", mobileNumber);
+
         Loans loans = loansRepository.findByMobileNumber(mobileNumber).orElseThrow(
-                () -> new ResourceNotFoundException("Loan", "mobileNumber", mobileNumber)
+                () -> {
+                    log.warn("Logic: FetchLoan | NOT_FOUND | Mobile: {}", mobileNumber);
+                    return new ResourceNotFoundException("Loan", "mobileNumber", mobileNumber);
+                }
         );
         return LoansMapper.mapToLoansDto(loans, new LoansDto());
     }
@@ -68,11 +82,20 @@ public class LoansServiceImpl implements ILoansService {
      */
     @Override
     public boolean updateLoan(LoansDto loansDto) {
+        log.debug("Logic: UpdateLoan | Database query for LoanNo: {}", loansDto.getLoanNumber());
+
         Loans loans = loansRepository.findByLoanNumber(loansDto.getLoanNumber()).orElseThrow(
-                () -> new ResourceNotFoundException("Loan", "LoanNumber", loansDto.getLoanNumber()));
+                () -> {
+                    log.error("Logic: UpdateLoan | FAILED | LoanNo: {} not found", loansDto.getLoanNumber());
+                    return new ResourceNotFoundException("Loan", "LoanNumber", loansDto.getLoanNumber());
+                }
+        );
+
         LoansMapper.mapToLoans(loansDto, loans);
         loansRepository.save(loans);
-        return  true;
+
+        log.info("Logic: UpdateLoan | Success: LoanNo: {} status updated", loans.getLoanNumber());
+        return true;
     }
 
     /**
@@ -81,10 +104,14 @@ public class LoansServiceImpl implements ILoansService {
      */
     @Override
     public boolean deleteLoan(String mobileNumber) {
+        log.debug("Logic: DeleteLoan | Database query for Mobile: {}", mobileNumber);
+
         Loans loans = loansRepository.findByMobileNumber(mobileNumber).orElseThrow(
                 () -> new ResourceNotFoundException("Loan", "mobileNumber", mobileNumber)
         );
+
         loansRepository.deleteById(loans.getLoanId());
+        log.info("Logic: DeleteLoan | Success: Record deleted for Mobile: {}", mobileNumber);
         return true;
     }
 
