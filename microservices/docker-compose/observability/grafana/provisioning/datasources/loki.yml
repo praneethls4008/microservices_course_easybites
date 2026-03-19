@@ -7,3 +7,15 @@ datasources:
     access: proxy
     url: http://loki:3100
     editable: true
+
+    jsonData:
+      derivedFields:
+        - name: TraceID
+          matcherRegex: "\\[(?:[^,]+),([a-f0-9]+),[a-f0-9]+\\]"
+          datasourceUid: "tempo"
+          url: '${__value.raw}'
+
+        - name: SpanID
+          matcherRegex: "\\[(?:[^,]+),[a-f0-9]+,([a-f0-9]+)\\]"
+          datasourceUid: "tempo"
+          url: '${__value.raw}'
