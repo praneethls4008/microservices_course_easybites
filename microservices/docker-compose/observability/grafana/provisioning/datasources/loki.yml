@@ -9,13 +9,16 @@ datasources:
     editable: true
 
     jsonData:
+      # The trace_id and span_id are now stored as structured
+      # metadata fields by Alloy, so we match them directly from the JSON
+      # body instead.
       derivedFields:
         - name: TraceID
-          matcherRegex: "\\[(?:[^,]+),([a-f0-9]+),[a-f0-9]+\\]"
+          matcherRegex: '"trace_id":"([a-f0-9]+)"'
           datasourceUid: "tempo"
           url: '${__value.raw}'
 
         - name: SpanID
-          matcherRegex: "\\[(?:[^,]+),[a-f0-9]+,([a-f0-9]+)\\]"
+          matcherRegex: '"span_id":"([a-f0-9]+)"'
           datasourceUid: "tempo"
           url: '${__value.raw}'

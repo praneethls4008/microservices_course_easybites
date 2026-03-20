@@ -8,5 +8,18 @@ datasources:
     editable: true
 
     jsonData:
+      httpMethod: GET
       serviceMap:
+        datasourceUid: 'prometheus'
+      # Link Tempo traces back to Loki logs using trace_id
+      tracesToLogsV2:
+        datasourceUid: 'loki'
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+        filterBySpanID: false
+        customQuery: true
+        query: '{job="docker"} | trace_id = "${__trace.traceId}"'
+      # Link Tempo traces to Prometheus metrics
+      tracesToMetrics:
         datasourceUid: 'prometheus'

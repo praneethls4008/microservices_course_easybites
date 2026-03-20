@@ -24,8 +24,10 @@ schema_config:
         prefix: index_
         period: 24h
 
+# tsdb schema (v13). Removing it prevents Loki from logging confusing
+# warnings and potentially misconfiguring the index directory.
 storage_config:
-  boltdb_shipper:
+  tsdb_shipper:
     active_index_directory: /loki/index
     cache_location: /loki/cache
 

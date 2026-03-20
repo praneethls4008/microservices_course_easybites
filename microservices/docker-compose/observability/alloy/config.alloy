@@ -1,9 +1,13 @@
-// Discover Docker containers
+// ==========================
+// 1. Discover Docker containers
+// ==========================
 discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
 }
 
-// Add useful labels
+// ==========================
+// 2. Add labels
+// ==========================
 discovery.relabel "log_labels" {
   targets = discovery.docker.containers.targets
 
@@ -19,40 +23,47 @@ discovery.relabel "log_labels" {
   }
 }
 
-// Read logs from Docker
-loki.source.docker "containers" {
-  host    = "unix:///var/run/docker.sock"
-  targets = discovery.relabel.log_labels.output
-
-  forward_to = [loki.process.docker_logs.receiver]
+// ==========================
+// 3. Loki Write (DEFINE FIRST ✅)
+// ==========================
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
 }
 
+// ==========================
+// 4. Process Logs
+// ==========================
 loki.process "docker_logs" {
+
   stage.docker {}
 
-  // ✅ Try parsing JSON (only for labels, NOT output)
-  stage.json {
-    source = "log"
-
-    expressions = {
-      trace_id = "trace_id",
-      span_id  = "span_id",
-      level    = "level",
-    }
-
-    drop_malformed = false
+  // ✅ Extract trace_id & span_id
+  stage.regex {
+    expression = ".*\\[(?P<service>[^,]+),(?P<trace_id>[a-f0-9]+),(?P<span_id>[a-f0-9]+)\\]"
   }
 
-  // ✅ Promote labels (works for JSON logs)
   stage.labels {
     values = {
-      trace_id = "",
-      span_id  = "",
-      level    = "",
+      trace_id = "trace_id",
+      span_id  = "span_id",
+      service  = "service",
     }
   }
 
-  // ✅ ALWAYS show original log (no <no value> possible)
+  // ✅ Extract log level
+  stage.regex {
+    expression = ".* (?P<level>INFO|ERROR|WARN|DEBUG) .*"
+  }
+
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+
+  // Keep original log
   stage.output {
     source = "log"
   }
@@ -66,9 +77,12 @@ loki.process "docker_logs" {
   forward_to = [loki.write.default.receiver]
 }
 
-// Send logs to Loki
-loki.write "default" {
-  endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
-  }
+// ==========================
+// 5. Read Docker Logs
+// ==========================
+loki.source.docker "containers" {
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.log_labels.output
+
+  forward_to = [loki.process.docker_logs.receiver]
 }
