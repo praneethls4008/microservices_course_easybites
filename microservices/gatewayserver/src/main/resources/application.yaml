@@ -7,6 +7,11 @@ spring:
   config:
     # Points to the 'configserver' service name defined in docker-compose
     import: "optional:configserver:http://configserver:${PORT_CONFIGSERVER:8801}"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
   cloud:
     gateway:
       discovery:
