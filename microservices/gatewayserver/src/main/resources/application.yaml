@@ -35,6 +35,9 @@ spring:
 
 logging:
   level:
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
     com:
       eazybytes:
         gatewayserver: DEBUG
