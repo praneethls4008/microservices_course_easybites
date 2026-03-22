@@ -2,7 +2,6 @@ package com.eazybytes.gatewayserver.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -14,6 +13,9 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity security){
         security.authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/accounts/**").hasRole("ACCOUNTS")
+                        .pathMatchers("/loans/**").hasRole("LOANS")
+                        .pathMatchers("/cards/**").hasRole("CARDS")
                 .anyExchange()
                 .authenticated())
                 .oauth2ResourceServer(oAuth2ResourceServerSpec -> oAuth2ResourceServerSpec

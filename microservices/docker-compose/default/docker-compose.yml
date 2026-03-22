@@ -1,4 +1,18 @@
 services:
+
+  browser:
+    image: kasmweb/chrome:1.14.0
+    container_name: kasm-browser
+    ports:
+      - "6901:6901"
+    environment:
+      - VNC_PW=password
+    shm_size: "512m"
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+
   # Infrastructure: RabbitMQ
   rabbit:
     image: rabbitmq:4-management
@@ -68,6 +82,7 @@ services:
       KC_HOSTNAME: keycloak
       KC_HOSTNAME_PORT: 8080
       KC_HOSTNAME_STRICT: false
+      KC_PROXY: edge
     ports:
       - "8911:8080"
     depends_on:
