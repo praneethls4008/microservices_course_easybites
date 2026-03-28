@@ -1,0 +1,9 @@
+server:
+  port: 40004
+
+spring:
+  application:
+    name: message
+  cloud:
+    function:
+      definition: email|sms
