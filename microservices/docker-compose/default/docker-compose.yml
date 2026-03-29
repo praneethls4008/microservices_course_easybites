@@ -1,18 +1,5 @@
 services:
 
-  browser:
-    image: kasmweb/chrome:1.14.0
-    container_name: kasm-browser
-    ports:
-      - "6901:6901"
-    environment:
-      - VNC_PW=password
-    shm_size: "512m"
-    extends:
-      file: common-config.yml
-      service: network-deploy-service
-
-
   # Infrastructure: RabbitMQ
   rabbit:
     image: rabbitmq:4-management
@@ -79,8 +66,8 @@ services:
       KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: keycloak
-      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8911
       KC_HOSTNAME_STRICT: false
       KC_PROXY: edge
     ports:
@@ -279,6 +266,26 @@ services:
       SPRING_APPLICATION_NAME: "loans"
       OTEL_SERVICE_NAME: "loans"
       SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+  message:
+    build:
+      context: ../../message
+      dockerfile: Dockerfile
+    image: myapp/message:1.0.1
+    container_name: message-ms
+    ports:
+      - "${PORT_MESSAGE}:${PORT_MESSAGE}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "message"
+      OTEL_SERVICE_NAME: "message"
     extends:
       file: common-config.yml
       service: microservice-configserver-config

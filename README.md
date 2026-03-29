@@ -179,3 +179,4 @@ Keycloak dummy user creds:
     email: myuser1
     username: myuser1@email.com
     password: password
+client cred: m1j7OAgnIQOZwYNE6ot4CS00zWL7Eo5f

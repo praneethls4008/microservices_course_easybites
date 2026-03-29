@@ -1,9 +1,11 @@
 server:
-  port: 40004
+  port: ${PORT_MESSAGE:40003}
 
 spring:
   application:
-    name: message
+    name: "message"
+  config:
+    import: "optional:configserver:http://configserver:8801"
   cloud:
     function:
       definition: email|sms
@@ -20,3 +22,41 @@ spring:
     username: ${SPRING_RABBITMQ_USERNAME:guest}
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+  metrics:
+    logs:
+      application: ${spring.application.name}
+logging:
+  level:
+    com:
+      eazybytes:
+        message: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      # Use the variable defined in common-config
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8070/eureka/}
+
+info:
+  app:
+    name: "message"
+    description: "Message application"
+    version: "1.0.0"
