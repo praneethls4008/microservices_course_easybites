@@ -66,8 +66,11 @@ services:
       KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 8911
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_PORT: 8080
+#      To Run Keycloak in local host
+#      KC_HOSTNAME: localhost
+#      KC_HOSTNAME_PORT: 8911
       KC_HOSTNAME_STRICT: false
       KC_PROXY: edge
     ports:
