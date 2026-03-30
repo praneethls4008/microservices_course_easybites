@@ -16,6 +16,10 @@ spring:
           group: ${spring.application.name}
         emailsms-out-0:
           destination: communication-sent
+      default-binder: kafka
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:localhost:8902}
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}
     port: 5672

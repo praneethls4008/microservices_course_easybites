@@ -62,6 +62,7 @@ public class AccountsServiceImpl  implements IAccountsService {
         log.info("Is the Communication request successfully triggered ? : {}", result);
     }
 
+
     /**
      * @param customer - Customer Object
      * @return the new account details

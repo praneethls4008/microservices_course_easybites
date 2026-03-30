@@ -18,6 +18,42 @@ services:
       timeout: 5s
       retries: 10
 
+  kafka:
+    image: apache/kafka:4.1.1
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "${PORT_KAFKA}:${PORT_KAFKA}"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:${PORT_KAFKA}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://kafka:${PORT_KAFKA}
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # CHANGE: Move logs out of /tmp for better persistence
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z kafka ${PORT_KAFKA} || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+
   redis:
     image: redis:7-alpine
     container_name: redis-ms
@@ -223,6 +259,7 @@ services:
       SPRING_APPLICATION_NAME: "accounts"
       OTEL_SERVICE_NAME: "accounts"
       SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:${PORT_KAFKA}"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -289,6 +326,7 @@ services:
     environment:
       SPRING_APPLICATION_NAME: "message"
       OTEL_SERVICE_NAME: "message"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:${PORT_KAFKA}"
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -301,6 +339,7 @@ volumes:
   rabbit_data:
   redis_data:
   keycloak-db-data:
+  kafka_data:
 
 networks:
   observability-net:
