@@ -37,6 +37,7 @@ spring:
       circuitbreaker:
         enabled: true
     stream:
+      default-binder: kafka
       bindings:
         sendCommunication-out-0:
           destination: send-communication
@@ -44,9 +45,7 @@ spring:
       kafka:
         binder:
           brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:localhost:8902}
-      rabbit:
-        binder:
-          addresses: ${SPRING_RABBITMQ_HOST:localhost}:5672
+
 
   sql:
     init:
