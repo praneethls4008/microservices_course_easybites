@@ -104,9 +104,9 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HOSTNAME: keycloak
       KC_HOSTNAME_PORT: 8080
-#      To Run Keycloak in local host
-#      KC_HOSTNAME: localhost
-#      KC_HOSTNAME_PORT: 8911
+      #      To Run Keycloak in local host
+      #      KC_HOSTNAME: localhost
+      #      KC_HOSTNAME_PORT: 8911
       KC_HOSTNAME_STRICT: false
       KC_PROXY: edge
     ports:
@@ -310,7 +310,26 @@ services:
       file: common-config.yml
       service: microservice-configserver-config
 
-
+  message:
+    build:
+      context: ../../message
+      dockerfile: Dockerfile
+    image: myapp/message:1.0.1
+    container_name: message-ms
+    ports:
+      - "${PORT_MESSAGE}:${PORT_MESSAGE}"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver: # Ensure Eureka is at least starting
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "message"
+      OTEL_SERVICE_NAME: "message"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:${PORT_KAFKA}"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
 
 # NEW: Define the volumes so Docker knows to manage them
 volumes:
