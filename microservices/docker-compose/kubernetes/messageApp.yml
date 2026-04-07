@@ -18,7 +18,7 @@ spec:
         - name: message-ms
           image: myapp/message:1.0.1
           ports:
-            - containerPort: 8080 # Replace with your actual ${PORT_MESSAGE} value
+            - containerPort: 40004 # Replace with your actual ${PORT_MESSAGE} value
           env:
             - name: SPRING_APPLICATION_NAME
               value: "message"
@@ -43,5 +43,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80         # The port you'll use to call the service internally
-      targetPort: 8080 # Must match the containerPort above
+      targetPort: 40004 # Must match the containerPort above
   type: ClusterIP      # Standard internal communication
