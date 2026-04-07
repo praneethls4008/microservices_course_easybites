@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loansdb # DNS name inside cluster
+spec:
+  selector:
+    app: loansdb # Routes traffic to matching pods
+  ports:
+    - port: 3309 # Cluster port
+      targetPort: 3306 # Container port
+  clusterIP: None # Headless service (optional for DB)

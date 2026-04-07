@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts
+spec:
+  replicas: 2 # Scalable microservice
+  selector:
+    matchLabels:
+      app: accounts
+  template:
+    metadata:
+      labels:
+        app: accounts
+    spec:
+      containers:
+        - name: accounts
+          image: myapp/accounts:1.0.1
+          ports:
+            - containerPort: 40001
+          envFrom:
+            - configMapRef:
+                name: global-config
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: "accounts"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://accountsdb:3306/accountsdb"
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              value: "kafka:8902"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 40001
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 40001

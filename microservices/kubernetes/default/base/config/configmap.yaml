@@ -1,0 +1,51 @@
+apiVersion: v1 # Kubernetes API version for ConfigMap
+kind: ConfigMap # Defines this as a ConfigMap resource
+metadata:
+  name: global-config # Name used by pods to reference this config
+data:
+#  PROFILES ACTIVATED
+  PROFILES_ACTIVE: "default"
+
+# ACCOUNTS
+  PORT_ACCOUNTS: "40001"
+
+# CARDS
+  PORT_CARDS: "40002"
+
+# LOANS
+  PORT_LOANS: "40003"
+
+# MESSAGE
+  PORT_MESSAGE: "40004"
+
+# KAFKA
+  PORT_KAFKA: "8902"
+
+# REDIS
+  REDIS_HOST: redis
+  PORT_REDIS: 6379
+
+#  Eureka
+  PORT_EUREKASERVER: "8761"
+  EUREKA_INSTANCE_HOSTNAME: "eurekaserver"
+  EUREKA_DEFAULT_ZONE_URL: "http://eurekaserver:8761/eureka/"
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+
+#  Keycloak
+  PORT_KEYCLOAK: "8911"
+  OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://keycloak:8080/realms/master"
+
+#Rabbit
+  PORT_RABBIT: "5672"
+  PORT_RABBIT_UI: "15672"
+  RABBITMQ_HOST: "rabbit"
+
+#  OPEN TELEMETRY
+  OPEN_TEL_JAR_PATH: "-javaagent:/app/libs/opentelemetry-javaagent.jar"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4318"
+  OTEL_METRICS_EXPORTER: none
+  OTEL_LOGS_EXPORTER: none
+
+# CONFIG SERVER
+  PORT_CONFIGSERVER: "8801"
+  SPRING_CONFIG_IMPORT: "configserver:http://configserver:8801/"

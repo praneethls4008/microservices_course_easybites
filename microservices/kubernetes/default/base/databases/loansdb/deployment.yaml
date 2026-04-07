@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loansdb # Name of deployment
+spec:
+  replicas: 1 # Single instance (DB usually stateful)
+  selector:
+    matchLabels:
+      app: loansdb # Used to match pods
+  template:
+    metadata:
+      labels:
+        app: loansdb
+    spec:
+      containers:
+        - name: mysql # Container name
+          image: mysql:9.0 # MySQL image
+          ports:
+            - containerPort: 3306 # DB port inside container
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: global-secret
+                  key: MYSQL_ROOT_PASSWORD # Secure password
+            - name: MYSQL_DATABASE
+              value: loansdb # DB name
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql # Persistent storage path
+          resources:
+            limits:
+              memory: "700Mi" # Memory limit (best practice)
+          readinessProbe:
+            exec:
+              command: ["mysqladmin","ping","-h","localhost"] # DB health check
+            initialDelaySeconds: 20
+            periodSeconds: 5
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: loansdb-pvc # Attach PVC

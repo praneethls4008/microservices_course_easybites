@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configserver
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: configserver
+
+  template:
+    metadata:
+      labels:
+        app: configserver
+
+    spec:
+      containers:
+        - name: configserver
+          image: myapp/config-server:1.0.1
+
+          ports:
+            - containerPort: 8801
+
+          envFrom:
+            - configMapRef:
+                name: global-config
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: configserver
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8801

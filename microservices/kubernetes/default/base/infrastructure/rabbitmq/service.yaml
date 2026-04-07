@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      protocol: TCP
+      port: 5672         # Port other apps use to talk to Rabbit
+      targetPort: 5672   # Port inside the container
+    - name: management
+      protocol: TCP
+      port: 15672        # Port for the UI
+      targetPort: 15672
+  type: ClusterIP        # Use 'NodePort' or 'LoadBalancer' for external access
