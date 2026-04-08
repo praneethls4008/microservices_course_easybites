@@ -8,3 +8,5 @@ spec:
   ports:
     - port: 40001
       targetPort: 40001
+
+  type: ClusterIP
