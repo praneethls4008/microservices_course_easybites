@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: accounts
+  name: message
 spec:
   selector:
-    app: accounts
+    app: message
   ports:
-    - port: 40001
-      targetPort: 40001
+    - port: 40004
+      targetPort: 40004
 
   type: ClusterIP
