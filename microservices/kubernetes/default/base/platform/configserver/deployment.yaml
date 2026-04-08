@@ -26,6 +26,13 @@ spec:
             - name: OTEL_SERVICE_NAME
               value: "configserver"
 
+#           rabbit mq (common)
+            - name: SPRING_RABBITMQ_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: global-secret
+                  key: RABBITMQ_HOST
+
 #            OPEN TELEMETRY (COMMON)
             - name: JAVA_TOOL_OPTIONS
               valueFrom:
