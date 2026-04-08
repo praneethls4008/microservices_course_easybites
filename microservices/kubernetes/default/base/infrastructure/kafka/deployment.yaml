@@ -7,23 +7,39 @@ spec:
   selector:
     matchLabels:
       app: kafka
-
   template:
     metadata:
       labels:
         app: kafka
-
     spec:
       containers:
         - name: kafka
           image: apache/kafka:4.1.1
-
           ports:
-            - containerPort: 29092
             - containerPort: 8902
+            - containerPort: 29092
+            - containerPort: 29093
 
           env:
             - name: KAFKA_BROKER_ID
+              value: "1"
+
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
+
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:8902"
+
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+
+            - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+              value: "0"
+
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "1"
+
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
               value: "1"
 
             - name: KAFKA_PROCESS_ROLES
@@ -36,10 +52,7 @@ spec:
               value: "1@kafka:29093"
 
             - name: KAFKA_LISTENERS
-              value: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:8902"
-
-            - name: KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:8902"
+              value: "PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:8902"
 
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: "PLAINTEXT"
@@ -50,10 +63,26 @@ spec:
             - name: KAFKA_LOG_DIRS
               value: "/var/lib/kafka/data"
 
+            - name: CLUSTER_ID
+              value: "MkU3OEVBNTcwNTJENDM2Qk"
+
           volumeMounts:
             - name: kafka-storage
               mountPath: /var/lib/kafka/data
 
+          readinessProbe:
+            tcpSocket:
+              port: 8902
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            tcpSocket:
+              port: 8902
+            initialDelaySeconds: 20
+            periodSeconds: 15
+
       volumes:
         - name: kafka-storage
-          emptyDir: {} # dev (use PVC in prod)
+          persistentVolumeClaim:
+            claimName: kafka-pvc
