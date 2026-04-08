@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: accountsdb # DNS name inside cluster
+  name: accountsdb
 spec:
   selector:
-    app: accountsdb # Routes traffic to matching pods
+    app: accountsdb
   ports:
-    - port: 3307 # Cluster port
-      targetPort: 3306 # Container port
-  clusterIP: None # Headless service (optional for DB)
+    - port: 3306
+      targetPort: 3306
+
+  type: ClusterIP
