@@ -29,33 +29,33 @@ spec:
 #           rabbit mq (common)
             - name: SPRING_RABBITMQ_HOST
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: RABBITMQ_HOST
 
 #            OPEN TELEMETRY (COMMON)
             - name: JAVA_TOOL_OPTIONS
               valueFrom:
-                  secretKeyRef:
-                    name: global-secret
+                  configMapKeyRef:
+                    name: global-config
                     key: OPEN_TEL_JAR_PATH
 
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OTEL_EXPORTER_OTLP_ENDPOINT # Secure password
 
             - name: OTEL_METRICS_EXPORTER
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OTEL_METRICS_EXPORTER
 
             - name: OTEL_LOGS_EXPORTER
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OTEL_LOGS_EXPORTER
 
           readinessProbe:

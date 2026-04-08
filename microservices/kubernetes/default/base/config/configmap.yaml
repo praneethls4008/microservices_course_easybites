@@ -19,8 +19,8 @@ data:
   PORT_MESSAGE: "40004"
 
 # REDIS
-  REDIS_HOST: redis
-  PORT_REDIS: 6379
+  REDIS_HOST: "redis"
+  PORT_REDIS: "6379"
 
 #  Eureka
   PORT_EUREKASERVER: "8761"
@@ -40,8 +40,8 @@ data:
 #  OPEN TELEMETRY
   OPEN_TEL_JAR_PATH: "-javaagent:/app/libs/opentelemetry-javaagent.jar"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4318"
-  OTEL_METRICS_EXPORTER: none
-  OTEL_LOGS_EXPORTER: none
+  OTEL_METRICS_EXPORTER: "none"
+  OTEL_LOGS_EXPORTER: "none"
 
 # CONFIG SERVER
   PORT_CONFIGSERVER: "8801"

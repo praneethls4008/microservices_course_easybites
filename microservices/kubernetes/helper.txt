@@ -26,14 +26,10 @@ kubectl create clusterrolebinding admin-user --clusterrole=cluster-admin --servi
 Generate a token:
 kubectl -n kubernetes-dashboard create token admin-user
 Copy the resulting token; you will need it to log in.
-GeeksforGeeks
-GeeksforGeeks
- +4
+
 3. Access the Dashboard
 The dashboard is not exposed publicly by default. Use kubectl proxy to create a secure bridge from your machine to the cluster:
-Kubernetes
-Kubernetes
- +2
+
 Start the proxy: Run kubectl proxy in your terminal.
 Open the URL: Navigate to the following address in your browser:
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/

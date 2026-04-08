@@ -39,64 +39,64 @@ spec:
             #           rabbit mq (common)
             - name: SPRING_RABBITMQ_HOST
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: RABBITMQ_HOST
 
             #            OPEN TELEMETRY (COMMON)
             - name: JAVA_TOOL_OPTIONS
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OPEN_TEL_JAR_PATH
 
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OTEL_EXPORTER_OTLP_ENDPOINT # Secure password
 
             - name: OTEL_METRICS_EXPORTER
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OTEL_METRICS_EXPORTER
 
             - name: OTEL_LOGS_EXPORTER
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: OTEL_LOGS_EXPORTER
 
             #           Microservices (Common)
             - name: SPRING_PROFILES_ACTIVE
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: PROFILES_ACTIVE
 
             - name: SPRING_CONFIG_IMPORT
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: SPRING_CONFIG_IMPORT
 
             - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: EUREKA_DEFAULT_ZONE_URL
 
             - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
 
             - name: EUREKA_INSTANCE_HOSTNAME
               valueFrom:
-                secretKeyRef:
-                  name: global-secret
+                configMapKeyRef:
+                  name: global-config
                   key: EUREKA_INSTANCE_HOSTNAME
 
           readinessProbe:
