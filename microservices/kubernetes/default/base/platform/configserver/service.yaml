@@ -8,3 +8,5 @@ spec:
   ports:
     - port: 8801
       targetPort: 8801
+
+  type: ClusterIP

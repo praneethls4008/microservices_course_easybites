@@ -2,19 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: configserver
-
 spec:
   replicas: 1
-
   selector:
     matchLabels:
       app: configserver
-
   template:
     metadata:
       labels:
         app: configserver
-
     spec:
       containers:
         - name: configserver
@@ -23,15 +19,24 @@ spec:
           ports:
             - containerPort: 8801
 
-          envFrom:
-            - configMapRef:
-                name: global-config
-
           env:
             - name: SPRING_APPLICATION_NAME
-              value: configserver
+              value: "configserver"
+
+            - name: OTEL_SERVICE_NAME
+              value: "configserver"
 
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8801
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 5
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8801
+            initialDelaySeconds: 40
+            periodSeconds: 20
