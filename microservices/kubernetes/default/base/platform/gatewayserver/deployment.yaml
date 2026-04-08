@@ -2,30 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gatewayserver
-
 spec:
   replicas: 1
-
   selector:
     matchLabels:
       app: gatewayserver
-
   template:
     metadata:
       labels:
         app: gatewayserver
-
     spec:
       containers:
-        - name: gateway
+        - name: gatewayserver
           image: myapp/gatewayserver:1.0.1
 
           ports:
             - containerPort: 8901
-
-          envFrom:
-            - configMapRef:
-                name: global-config
 
           env:
             - name: SPRING_APPLICATION_NAME
@@ -35,86 +27,24 @@ spec:
               value: "gatewayserver"
 
             - name: SPRING_REDIS_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: REDIS_HOST
+              value: "redis"
 
             - name: SPRING_REDIS_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: PORT_REDIS
+              value: "6379"
 
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: "http://keycloak:8080/realms/master"
 
-#           microserices common
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8901
+            initialDelaySeconds: 20
+            periodSeconds: 10
 
-            - name: SPRING_RABBITMQ_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: RABBITMQ_HOST
-
-            - name: JAVA_TOOL_OPTIONS
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: OPEN_TEL_JAR_PATH
-
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: OTEL_EXPORTER_OTLP_ENDPOINT
-
-            - name: OTEL_METRICS_EXPORTER
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: OTEL_METRICS_EXPORTER
-
-            - name: OTEL_LOGS_EXPORTER
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: OTEL_LOGS_EXPORTER
-
-#            eureka and config server
-            - name: SPRING_PROFILES_ACTIVE
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: PROFILES_ACTIVE
-
-            - name: SPRING_CONFIG_IMPORT
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: SPRING_CONFIG_IMPORT
-
-            - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: EUREKA_DEFAULT_ZONE_URL
-
-            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
-
-            - name: EUREKA_INSTANCE_HOSTNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: global-config
-                  key: EUREKA_INSTANCE_HOSTNAME
-
-
-
-
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8901
+            initialDelaySeconds: 40
+            periodSeconds: 20
