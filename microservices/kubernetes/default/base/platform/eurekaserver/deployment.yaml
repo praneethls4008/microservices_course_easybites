@@ -15,16 +15,27 @@ spec:
       containers:
         - name: eurekaserver
           image: myapp/eurekaserver:1.0.1
+
           ports:
             - containerPort: 8761
-          envFrom:
-            - configMapRef:
-                name: global-config # Load all envs
+
           env:
             - name: SPRING_APPLICATION_NAME
               value: "eurekaserver"
+
+            - name: OTEL_SERVICE_NAME
+              value: "eurekaserver"
+
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8761
             initialDelaySeconds: 20
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8761
+            initialDelaySeconds: 40
+            periodSeconds: 20
