@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cards
+spec:
+  selector:
+    app: cards
+  ports:
+    - port: 40002
+      targetPort: 40002
+
+  type: ClusterIP

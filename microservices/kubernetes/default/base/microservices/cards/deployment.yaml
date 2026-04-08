@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cards
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cards
+  template:
+    metadata:
+      labels:
+        app: cards
+    spec:
+      containers:
+        - name: cards
+          image: myapp/cards:1.0.1
+
+          ports:
+            - containerPort: 40002
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: "cards"
+
+            - name: OTEL_SERVICE_NAME
+              value: "cards"
+
+            # 🔹 DB Connection
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://cardsdb:3306/cardsdb"
+
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "root"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 40002
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 40002
+            initialDelaySeconds: 40
+            periodSeconds: 20
