@@ -26,6 +26,31 @@ spec:
             - name: OTEL_SERVICE_NAME
               value: "configserver"
 
+#            OPEN TELEMETRY (COMMON)
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom:
+                  secretKeyRef:
+                    name: global-secret
+                    key: OPEN_TEL_JAR_PATH
+
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: global-secret
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT # Secure password
+
+            - name: OTEL_METRICS_EXPORTER
+              valueFrom:
+                secretKeyRef:
+                  name: global-secret
+                  key: OTEL_METRICS_EXPORTER
+
+            - name: OTEL_LOGS_EXPORTER
+              valueFrom:
+                secretKeyRef:
+                  name: global-secret
+                  key: OTEL_LOGS_EXPORTER
+
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
