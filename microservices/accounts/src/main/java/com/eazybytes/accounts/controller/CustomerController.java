@@ -62,11 +62,6 @@ public class CustomerController {
                                                                    @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                    String mobileNumber) {
         return CompletableFuture.supplyAsync(() -> {
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignored) {}
-
             CustomerDetailsDto customerDetailsDto =
                     iCustomersService.fetchCustomerDetails(mobileNumber);
 

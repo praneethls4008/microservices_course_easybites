@@ -20,6 +20,8 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity security){
         security.authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/actuator/health/**").permitAll()
+                        .pathMatchers("/actuator/info").permitAll()
                         .pathMatchers("/accounts/**").hasRole("ACCOUNTS")
                         .pathMatchers("/loans/**").hasRole("LOANS")
                         .pathMatchers("/cards/**").hasRole("CARDS")
