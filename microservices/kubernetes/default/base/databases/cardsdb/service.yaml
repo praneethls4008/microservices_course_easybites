@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cardsdb # DNS name inside cluster
+  name: cardsdb
 spec:
   selector:
-    app: cardsdb # Routes traffic to matching pods
+    app: cardsdb
   ports:
-    - port: 3308 # Cluster port
-      targetPort: 3306 # Container port
-  clusterIP: None # Headless service (optional for DB)
+    - port: 3306
+      targetPort: 3306
+
+  type: ClusterIP

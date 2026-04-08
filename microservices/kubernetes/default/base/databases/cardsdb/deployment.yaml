@@ -1,42 +1,57 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cardsdb # Name of deployment
+  name: cardsdb
 spec:
-  replicas: 1 # Single instance (DB usually stateful)
+  replicas: 1
   selector:
     matchLabels:
-      app: cardsdb # Used to match pods
+      app: cardsdb
   template:
     metadata:
       labels:
         app: cardsdb
     spec:
       containers:
-        - name: mysql # Container name
-          image: mysql:9.0 # MySQL image
+        - name: mysql
+          image: mysql:8.0
+
           ports:
-            - containerPort: 3306 # DB port inside container
+            - containerPort: 3306
+
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: global-secret
-                  key: MYSQL_ROOT_PASSWORD # Secure password
             - name: MYSQL_DATABASE
-              value: cardsdb # DB name
+              value: "cardsdb"
+
+            # ⚠️ Required
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root"
+
           volumeMounts:
             - name: mysql-storage
-              mountPath: /var/lib/mysql # Persistent storage path
-          resources:
-            limits:
-              memory: "700Mi" # Memory limit (best practice)
+              mountPath: /var/lib/mysql
+
           readinessProbe:
             exec:
-              command: ["mysqladmin","ping","-h","localhost"] # DB health check
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
             initialDelaySeconds: 20
-            periodSeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 40
+            periodSeconds: 20
+
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
-            claimName: cardsdb-pvc # Attach PVC
+            claimName: cardsdb-pvc
