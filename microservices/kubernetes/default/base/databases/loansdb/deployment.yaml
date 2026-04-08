@@ -2,54 +2,74 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loansdb
+  labels:
+    app: loansdb
+
 spec:
-  replicas: 1
+  replicas: 1 # DB should not scale horizontally like this
+
   selector:
     matchLabels:
       app: loansdb
+
   template:
     metadata:
       labels:
         app: loansdb
+
     spec:
       containers:
         - name: mysql
-          image: mysql:8.0
+          image: mysql:9.0
 
           ports:
             - containerPort: 3306
 
           env:
-            - name: MYSQL_DATABASE
-              value: "loansdb"
-
-            # ⚠️ REQUIRED
+            # ROOT PASSWORD (from secret)
             - name: MYSQL_ROOT_PASSWORD
-              value: "root"
+              valueFrom:
+                secretKeyRef:
+                  name: global-secret
+                  key: MYSQL_ROOT_PASSWORD
+
+            # DATABASE NAME (same as compose)
+            - name: MYSQL_DATABASE
+              value: loansdb
 
           volumeMounts:
             - name: mysql-storage
-              mountPath: /var/lib/mysql
+              mountPath: /var/lib/mysql # EXACT same as docker
 
+          # 🔥 HEALTHCHECK → readinessProbe (important)
           readinessProbe:
             exec:
               command:
-                - mysqladmin
-                - ping
-                - -h
-                - localhost
-            initialDelaySeconds: 20
-            periodSeconds: 10
+                - sh
+                - -c
+                - mysql -h localhost -uroot -p$MYSQL_ROOT_PASSWORD -e "SELECT 1"
+            initialDelaySeconds: 20   # start_period
+            periodSeconds: 5          # interval
+            timeoutSeconds: 5
+            failureThreshold: 10      # retries
 
+          # 🔥 Liveness (restart if dead)
           livenessProbe:
             exec:
               command:
-                - mysqladmin
-                - ping
-                - -h
-                - localhost
-            initialDelaySeconds: 40
-            periodSeconds: 20
+                - sh
+                - -c
+                - mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "700Mi"
+              cpu: "500m"
 
       volumes:
         - name: mysql-storage
