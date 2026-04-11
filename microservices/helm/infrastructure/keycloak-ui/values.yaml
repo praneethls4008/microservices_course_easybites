@@ -47,7 +47,7 @@ env:
     value: localhost
 
   - name: KC_HOSTNAME_PORT
-    value: "8080"
+    value: "30081"
 
   - name: KC_HOSTNAME_STRICT
     value: "false"

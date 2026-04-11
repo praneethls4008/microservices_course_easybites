@@ -4,7 +4,11 @@ image: redis:7-alpine
 replicaCount: 1
 
 storage: 500Mi
-
+persistence:
+  enabled: true
+  name: data
+  size: 500Mi
+  accessMode: ReadWriteOnce
 ports:
   - 6379
 

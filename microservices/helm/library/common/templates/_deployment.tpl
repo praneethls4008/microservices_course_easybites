@@ -19,10 +19,26 @@ spec:
         app: {{ .Values.name }}
 
     spec:
+
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- toYaml .Values.initContainers | nindent 8 }}
+      {{- end }}
+
       containers:
         - name: {{ .Values.name }}
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+
+          {{- if .Values.command }}
+          command:
+            {{- toYaml .Values.command | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.args }}
+          args:
+            {{- toYaml .Values.args | nindent 12 }}
+          {{- end }}
 
           {{- if .Values.ports }}
           ports:
@@ -31,14 +47,17 @@ spec:
             {{- end }}
           {{- end }}
 
-          # 🔥 ENV HANDLING (GLOBAL + SERVICE-SPECIFIC)
+          # Global base env (injected for ALL Spring Boot services)
           env:
-            # ✅ Global base env (for ALL services)
             - name: SPRING_RABBITMQ_HOST
               value: {{ .Values.global.rabbitmq.host | quote }}
 
             - name: JAVA_TOOL_OPTIONS
+              {{- if or (eq .Values.name "keycloak") (eq .Values.name "keycloak-ui") }}
+              value: ""
+              {{- else }}
               value: {{ .Values.global.otel.javaAgent | quote }}
+              {{- end }}
 
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ .Values.global.otel.endpoint | quote }}
@@ -50,7 +69,7 @@ spec:
               value: "none"
 
             {{- if ne .Values.type "configserver" }}
-            # ✅ Only for microservices + platform (NOT configserver)
+            # Only for microservices + platform (NOT configserver itself)
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.global.spring.profile | quote }}
 
@@ -67,24 +86,29 @@ spec:
               value: {{ .Values.global.eureka.hostname | quote }}
             {{- end }}
 
-            # ✅ Service-specific env
+            # Service-specific env vars
             {{- if .Values.env }}
-{{ toYaml .Values.env | nindent 12 }}
+            {{- toYaml .Values.env | nindent 12 }}
             {{- end }}
 
           {{- if .Values.readinessProbe }}
           readinessProbe:
-{{ toYaml .Values.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
           {{- end }}
 
           {{- if .Values.livenessProbe }}
           livenessProbe:
-{{ toYaml .Values.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
           {{- end }}
 
           {{- if .Values.resources }}
           resources:
-{{ toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
           {{- end }}
 
 {{- end }}

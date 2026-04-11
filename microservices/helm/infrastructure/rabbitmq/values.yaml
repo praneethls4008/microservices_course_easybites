@@ -3,6 +3,12 @@ name: rabbitmq
 image: rabbitmq:4-management
 replicaCount: 1
 
+persistence:
+  enabled: true
+  name: data
+  size: 500Mi
+  accessMode: ReadWriteOnce
+
 storage: 500Mi
 
 ports:
@@ -17,23 +23,19 @@ volumeMounts:
   - name: data
     mountPath: /var/lib/rabbitmq
 
-livenessProbe:
-  exec:
-    command:
-      - rabbitmq-diagnostics
-      - check_port_connectivity
-  initialDelaySeconds: 20
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 10
-
 readinessProbe:
-  exec:
-    command:
-      - rabbitmq-diagnostics
-      - check_port_connectivity
-  initialDelaySeconds: 10
+  tcpSocket:
+    port: 5672
+  initialDelaySeconds: 15
   periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+livenessProbe:
+  tcpSocket:
+    port: 5672
+  initialDelaySeconds: 30
+  periodSeconds: 20
 
 service:
   type: ClusterIP

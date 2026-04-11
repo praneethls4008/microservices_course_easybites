@@ -1,3 +1,0 @@
-{{ include "common.deployment" . }}
----
-{{ include "common.service" . }}

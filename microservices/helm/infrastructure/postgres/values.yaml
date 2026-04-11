@@ -2,7 +2,11 @@ name: postgres
 
 image: postgres:15
 storage: 1Gi
-
+persistence:
+  enabled: true
+  name: data
+  size: 500Mi
+  accessMode: ReadWriteOnce
 ports:
   - 5432
 

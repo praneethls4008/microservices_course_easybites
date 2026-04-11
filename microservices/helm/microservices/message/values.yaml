@@ -5,9 +5,45 @@ replicaCount: 1
 ports:
   - 40004
 
+initContainers:
+  - name: wait-for-configserver
+    image: busybox
+    command: ["sh", "-c", "until nc -z configserver 8801; do echo waiting for configserver; sleep 2; done;"]
+  - name: wait-for-eureka
+    image: busybox
+    command: ["sh", "-c", "until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;"]
+
 env:
   - name: SPRING_APPLICATION_NAME
-    value: message
+    value: "message"
+  - name: OTEL_SERVICE_NAME
+    value: "message"
+  - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+    value: "kafka:8902"
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 40004
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 40004
+  initialDelaySeconds: 60
+  periodSeconds: 20
+
+resources:
+  requests:
+    memory: "300Mi"
+    cpu: "200m"
+  limits:
+    memory: "700Mi"
+    cpu: "500m"
 
 service:
   type: ClusterIP

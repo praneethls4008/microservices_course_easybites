@@ -1,4 +1,5 @@
 name: configserver
+type: configserver
 
 image: myapp/config-server:1.0.1
 replicaCount: 1
@@ -16,27 +17,28 @@ initContainers:
       - until nc -z rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;
 
 env:
+  - name: SPRING_CLOUD_CONFIG_ENABLED
+    value: "false"
+
   - name: SPRING_APPLICATION_NAME
     value: "configserver"
 
   - name: OTEL_SERVICE_NAME
     value: "configserver"
 
-# 🔥 Healthcheck → probes
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8801
-  initialDelaySeconds: 30
+  initialDelaySeconds: 60  # Give it a full minute
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 10
+  failureThreshold: 10     # Be patient before failing
 
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 8801
-  initialDelaySeconds: 60
+  initialDelaySeconds: 120 # Give it 2 minutes before ever restarting it
   periodSeconds: 20
 
 resources:
