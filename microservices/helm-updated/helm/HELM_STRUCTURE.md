@@ -121,4 +121,7 @@ install release
 helm install easybites-v1 . -f ../environments/dev.yaml
 
 uninstall release
-helm uninstall easybites-v1 
+helm uninstall easybites-v1
+Remove-Item -Recurse -Force charts, Chart.lock
+
+.\scripts\build-all.ps1

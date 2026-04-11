@@ -53,12 +53,19 @@ spec:
             {{- toYaml .Values.args | nindent 12 }}
           {{- end }}
 
+
           {{- if .Values.ports }}
           ports:
             {{- range .Values.ports }}
+            {{- if kindIs "map" . }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+            {{- else }}
             - containerPort: {{ . }}
             {{- end }}
+            {{- end }}
           {{- end }}
+
 
           {{- if .Values.env }}
           env:

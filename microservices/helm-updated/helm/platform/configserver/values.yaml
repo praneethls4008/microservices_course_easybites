@@ -26,21 +26,19 @@ env:
   - name: OTEL_SERVICE_NAME
     value: "configserver"
 
-# 🔥 Healthcheck → probes
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8801
-  initialDelaySeconds: 30
+  initialDelaySeconds: 60  # Give it a full minute
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 10
+  failureThreshold: 10     # Be patient before failing
 
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 8801
-  initialDelaySeconds: 60
+  initialDelaySeconds: 120 # Give it 2 minutes before ever restarting it
   periodSeconds: 20
 
 resources:

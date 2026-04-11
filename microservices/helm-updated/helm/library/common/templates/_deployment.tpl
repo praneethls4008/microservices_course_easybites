@@ -53,7 +53,7 @@ spec:
               value: {{ .Values.global.rabbitmq.host | quote }}
 
             - name: JAVA_TOOL_OPTIONS
-              {{- if eq .Values.name "keycloak" }}
+              {{- if or (eq .Values.name "keycloak") (eq .Values.name "keycloak-ui") }}
               value: ""
               {{- else }}
               value: {{ .Values.global.otel.javaAgent | quote }}

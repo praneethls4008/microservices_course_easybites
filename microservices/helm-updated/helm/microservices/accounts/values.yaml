@@ -37,18 +37,17 @@ env:
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
-    port: 40001
-  initialDelaySeconds: 30
+    port: 40001 # Or your internal port, e.g., 40001
+  initialDelaySeconds: 50  # Give it nearly a minute
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 10
+  failureThreshold: 5
 
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 40001
-  initialDelaySeconds: 60
-  periodSeconds: 20
+  initialDelaySeconds: 70  # Wait longer than readiness
+  periodSeconds: 15
 
 resources:
   requests:
