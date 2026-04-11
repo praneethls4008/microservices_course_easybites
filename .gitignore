@@ -74,3 +74,6 @@ build/
 /microservices/helm/umbrella/charts/message-1.0.0.tgz
 /microservices/helm/umbrella/charts/rabbitmq-1.0.0.tgz
 /microservices/helm/umbrella/charts/redis-1.0.0.tgz
+/microservices/helm-updated/helm/umbrella/charts/secrets-1.0.0.tgz
+*.tgz
+Chart.lock

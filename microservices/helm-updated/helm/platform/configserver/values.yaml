@@ -1,0 +1,58 @@
+name: configserver
+type: configserver
+
+image: myapp/config-server:1.0.1
+replicaCount: 1
+
+ports:
+  - 8801
+
+# 🔥 Replace depends_on (RabbitMQ)
+initContainers:
+  - name: wait-for-rabbitmq
+    image: busybox
+    command:
+      - sh
+      - -c
+      - until nc -z rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;
+
+env:
+  - name: SPRING_CLOUD_CONFIG_ENABLED
+    value: "false"
+
+  - name: SPRING_APPLICATION_NAME
+    value: "configserver"
+
+  - name: OTEL_SERVICE_NAME
+    value: "configserver"
+
+# 🔥 Healthcheck → probes
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8801
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8801
+  initialDelaySeconds: 60
+  periodSeconds: 20
+
+resources:
+  requests:
+    memory: "300Mi"
+    cpu: "200m"
+  limits:
+    memory: "700Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 8801
+      targetPort: 8801

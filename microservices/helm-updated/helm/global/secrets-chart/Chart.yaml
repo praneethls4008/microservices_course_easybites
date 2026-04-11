@@ -1,0 +1,4 @@
+apiVersion: v2
+name: secrets
+version: 1.0.0
+description: Global secrets for MySQL and Keycloak

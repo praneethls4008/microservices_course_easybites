@@ -1,0 +1,9 @@
+# Default secret values — override per environment via environments/*.yaml
+# In production, replace these with sealed-secrets or external-secrets operator
+
+mysql:
+  rootPassword: "root"
+
+keycloak:
+  dbPassword: "keycloak"
+  adminPassword: "admin"

@@ -1,0 +1,28 @@
+name: cardsdb
+image: mysql:9.0
+
+storage: 700Mi
+persistence:
+  enabled: true
+  name: data
+  size: 700Mi
+  accessMode: ReadWriteOnce
+env:
+  - name: MYSQL_DATABASE
+    value: cardsdb
+
+  - name: MYSQL_ROOT_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: global-secret
+        key: MYSQL_ROOT_PASSWORD
+
+volumeMounts:
+  - name: data
+    mountPath: /var/lib/mysql
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306

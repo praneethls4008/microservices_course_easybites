@@ -11,7 +11,10 @@ helm/
 │           ├── _secret.tpl
 │           ├── _probes.tpl
 │           └── _helpers.tpl
-│
+│── global/
+|   ├── secrets/
+|	├── keycloak-secret.yaml
+|	├── mysql-secret.yaml
 ├── infrastructure/
 │   ├── kafka/
 │   ├── rabbitmq/

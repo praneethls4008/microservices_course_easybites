@@ -1,0 +1,79 @@
+apiVersion: v2
+name: platform
+version: 1.0.0
+
+dependencies:
+
+  # ── Secrets (must deploy first) ──────────────────────────────────────────
+  - name: secrets
+    version: 1.0.0
+    repository: "file://../global/secrets-chart"
+    alias: globalSecrets
+
+  # ── Infrastructure ────────────────────────────────────────────────────────
+  - name: rabbitmq
+    version: 1.0.0
+    repository: "file://../infrastructure/rabbitmq"
+
+  - name: kafka
+    version: 1.0.0
+    repository: "file://../infrastructure/kafka"
+
+  - name: redis
+    version: 1.0.0
+    repository: "file://../infrastructure/redis"
+
+  - name: postgres
+    version: 1.0.0
+    repository: "file://../infrastructure/postgres"
+
+  - name: keycloak
+    version: 1.0.0
+    repository: "file://../infrastructure/keycloak"
+
+  - name: keycloak-ui
+    version: 1.0.0
+    repository: "file://../infrastructure/keycloak-ui"
+
+  # ── Platform ──────────────────────────────────────────────────────────────
+  - name: configserver
+    version: 1.0.0
+    repository: "file://../platform/configserver"
+
+  - name: eurekaserver
+    version: 1.0.0
+    repository: "file://../platform/eurekaserver"
+
+  - name: gatewayserver
+    version: 1.0.0
+    repository: "file://../platform/gatewayserver"
+
+  # ── Databases ─────────────────────────────────────────────────────────────
+  - name: accountsdb
+    version: 1.0.0
+    repository: "file://../databases/accountsdb"
+
+  - name: cardsdb
+    version: 1.0.0
+    repository: "file://../databases/cardsdb"
+
+  - name: loansdb
+    version: 1.0.0
+    repository: "file://../databases/loansdb"
+
+  # ── Microservices ─────────────────────────────────────────────────────────
+  - name: accounts
+    version: 1.0.0
+    repository: "file://../microservices/accounts"
+
+  - name: cards
+    version: 1.0.0
+    repository: "file://../microservices/cards"
+
+  - name: loans
+    version: 1.0.0
+    repository: "file://../microservices/loans"
+
+  - name: message
+    version: 1.0.0
+    repository: "file://../microservices/message"

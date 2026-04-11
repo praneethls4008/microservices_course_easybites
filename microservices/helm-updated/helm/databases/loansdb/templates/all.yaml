@@ -1,0 +1,3 @@
+{{ include "common.statefulset" . }}
+---
+{{ include "common.service" . }}

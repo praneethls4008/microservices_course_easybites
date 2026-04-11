@@ -1,0 +1,76 @@
+name: keycloak-ui
+
+image: quay.io/keycloak/keycloak:24.0.3
+replicaCount: 1
+
+ports:
+  - 8080
+
+command:
+  - "/opt/keycloak/bin/kc.sh"
+  - "start-dev"
+
+initContainers:
+  - name: wait-for-postgres
+    image: busybox
+    command:
+      - sh
+      - -c
+      - until nc -z postgres 5432; do echo "waiting for postgres"; sleep 2; done;
+
+env:
+  - name: KC_HEALTH_ENABLED
+    value: "true"
+
+  - name: KC_DB
+    value: postgres
+
+  - name: KC_DB_URL_HOST
+    value: postgres
+
+  - name: KC_DB_URL_DATABASE
+    value: keycloak
+
+  - name: KC_DB_USERNAME
+    value: keycloak
+
+  - name: KC_DB_PASSWORD
+    value: keycloak
+
+  - name: KEYCLOAK_ADMIN
+    value: admin
+
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: admin
+
+  - name: KC_HOSTNAME
+    value: localhost
+
+  - name: KC_HOSTNAME_PORT
+    value: "8080"
+
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+
+  - name: KC_PROXY
+    value: edge
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 20
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080

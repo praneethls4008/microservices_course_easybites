@@ -1,0 +1,62 @@
+name: cards
+image: myapp/cards:1.0.1
+replicaCount: 1
+
+ports:
+  - 40002
+
+initContainers:
+  - name: wait-for-configserver
+    image: busybox
+    command: ["sh", "-c", "until nc -z configserver 8801; do echo waiting for configserver; sleep 2; done;"]
+  - name: wait-for-eureka
+    image: busybox
+    command: ["sh", "-c", "until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;"]
+  - name: wait-for-cardsdb
+    image: busybox
+    command: ["sh", "-c", "until nc -z cardsdb 3306; do echo waiting for cardsdb; sleep 2; done;"]
+
+env:
+  - name: SPRING_APPLICATION_NAME
+    value: "cards"
+  - name: OTEL_SERVICE_NAME
+    value: "cards"
+  - name: SPRING_DATASOURCE_URL
+    value: "jdbc:mysql://cardsdb:3306/cardsdb"
+  - name: SPRING_DATASOURCE_USERNAME
+    value: "root"
+  - name: SPRING_DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: global-secret
+        key: MYSQL_ROOT_PASSWORD
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 40002
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 40002
+  initialDelaySeconds: 60
+  periodSeconds: 20
+
+resources:
+  requests:
+    memory: "300Mi"
+    cpu: "200m"
+  limits:
+    memory: "700Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 40002
+      targetPort: 40002
