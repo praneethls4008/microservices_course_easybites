@@ -1,0 +1,23 @@
+eurekaserver:
+  service:
+    type: NodePort
+    ports:
+      - port: 8761
+        targetPort: 8761
+        nodePort: 30061
+
+gatewayserver:
+  service:
+    type: NodePort
+    ports:
+      - port: 8901
+        targetPort: 8901
+        nodePort: 30001
+
+keycloak:
+  service:
+    type: NodePort
+    ports:
+      - port: 8080
+        targetPort: 8080
+        nodePort: 30080

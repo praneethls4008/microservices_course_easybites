@@ -1,0 +1,16 @@
+name: cards
+image: myapp/cards:1.0.1
+replicaCount: 1
+
+ports:
+  - 40002
+
+env:
+  - name: SPRING_APPLICATION_NAME
+    value: cards
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 40002
+      targetPort: 40002

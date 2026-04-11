@@ -1,0 +1,45 @@
+dependencies:
+- name: kafka
+  repository: file://../infrastructure/kafka
+  version: 1.0.0
+- name: rabbitmq
+  repository: file://../infrastructure/rabbitmq
+  version: 1.0.0
+- name: redis
+  repository: file://../infrastructure/redis
+  version: 1.0.0
+- name: keycloak
+  repository: file://../infrastructure/keycloak
+  version: 1.0.0
+- name: configserver
+  repository: file://../platform/configserver
+  version: 1.0.0
+- name: eurekaserver
+  repository: file://../platform/eurekaserver
+  version: 1.0.0
+- name: gatewayserver
+  repository: file://../platform/gatewayserver
+  version: 1.0.0
+- name: accountsdb
+  repository: file://../databases/accountsdb
+  version: 1.0.0
+- name: cardsdb
+  repository: file://../databases/cardsdb
+  version: 1.0.0
+- name: loansdb
+  repository: file://../databases/loansdb
+  version: 1.0.0
+- name: accounts
+  repository: file://../microservices/accounts
+  version: 1.0.0
+- name: cards
+  repository: file://../microservices/cards
+  version: 1.0.0
+- name: loans
+  repository: file://../microservices/loans
+  version: 1.0.0
+- name: message
+  repository: file://../microservices/message
+  version: 1.0.0
+digest: sha256:1e9bb512d19938ecef884f0d7d4cd9583c570a9e4b79a4d9457dbc0687a42fd4
+generated: "2026-04-11T17:11:44.5788216+05:30"

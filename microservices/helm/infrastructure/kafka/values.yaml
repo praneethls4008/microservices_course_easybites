@@ -1,0 +1,30 @@
+name: kafka
+image: apache/kafka:4.1.1
+
+storage: 500Mi
+
+ports:
+  - 8902
+  - 29092
+  - 29093
+
+env:
+  - name: KAFKA_BROKER_ID
+    value: "1"
+
+volumeMounts:
+  - name: data
+    mountPath: /var/lib/kafka/data
+
+service:
+  type: ClusterIP
+  ports:
+    - name: external
+      port: 8902
+      targetPort: 8902
+    - name: internal
+      port: 29092
+      targetPort: 29092
+    - name: controller
+      port: 29093
+      targetPort: 29093

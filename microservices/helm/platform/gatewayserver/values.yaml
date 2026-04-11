@@ -1,0 +1,83 @@
+name: gatewayserver
+
+image: myapp/gatewayserver:1.0.1
+replicaCount: 1
+
+ports:
+  - 8901
+
+# 🔥 WAIT FOR DEPENDENCIES (replaces depends_on)
+initContainers:
+  - name: wait-for-configserver
+    image: busybox
+    command:
+      - sh
+      - -c
+      - until nc -z configserver 8801; do echo waiting for configserver; sleep 2; done;
+
+  - name: wait-for-eureka
+    image: busybox
+    command:
+      - sh
+      - -c
+      - until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;
+
+  - name: wait-for-redis
+    image: busybox
+    command:
+      - sh
+      - -c
+      - until nc -z redis 6379; do echo waiting for redis; sleep 2; done;
+
+  - name: wait-for-keycloak
+    image: busybox
+    command:
+      - sh
+      - -c
+      - until nc -z keycloak 8080; do echo waiting for keycloak; sleep 2; done;
+
+# 🔥 SERVICE-SPECIFIC ENV ONLY
+env:
+  - name: SPRING_APPLICATION_NAME
+    value: "gatewayserver"
+
+  - name: OTEL_SERVICE_NAME
+    value: "gatewayserver"
+
+  - name: SPRING_REDIS_HOST
+    value: redis
+
+  - name: SPRING_REDIS_PORT
+    value: "6379"
+
+  - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+    value: "http://keycloak:8080/realms/master"
+
+# 🔥 probes (VERY IMPORTANT)
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8901
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8901
+  initialDelaySeconds: 60
+  periodSeconds: 20
+
+resources:
+  requests:
+    memory: "300Mi"
+    cpu: "200m"
+  limits:
+    memory: "700Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 8901
+      targetPort: 8901

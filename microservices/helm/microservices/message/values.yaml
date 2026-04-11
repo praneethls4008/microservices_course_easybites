@@ -1,0 +1,16 @@
+name: message
+image: myapp/message:1.0.1
+replicaCount: 1
+
+ports:
+  - 40004
+
+env:
+  - name: SPRING_APPLICATION_NAME
+    value: message
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 40004
+      targetPort: 40004

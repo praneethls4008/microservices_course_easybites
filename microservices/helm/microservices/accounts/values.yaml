@@ -1,0 +1,16 @@
+name: accounts
+image: myapp/accounts:1.0.1
+replicaCount: 1
+
+ports:
+  - 40001
+
+env:
+  - name: SPRING_APPLICATION_NAME
+    value: accounts
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 40001
+      targetPort: 40001

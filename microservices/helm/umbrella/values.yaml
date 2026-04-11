@@ -1,0 +1,18 @@
+global:
+
+  rabbitmq:
+    host: rabbitmq
+
+  otel:
+    endpoint: http://tempo:4318
+    javaAgent: "-javaagent:/app/libs/opentelemetry-javaagent.jar"
+
+  spring:
+    profile: default
+
+  ports:
+    configserver: 8801
+
+  eureka:
+    hostname: eurekaserver
+    url: http://eurekaserver:8761/eureka/

@@ -1,0 +1,16 @@
+name: loans
+image: myapp/loans:1.0.1
+replicaCount: 1
+
+ports:
+  - 40003
+
+env:
+  - name: SPRING_APPLICATION_NAME
+    value: loans
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 40003
+      targetPort: 40003
