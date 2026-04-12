@@ -1,0 +1,67 @@
+name: grafana
+image: grafana/grafana:11.0.0
+replicaCount: 1
+
+# Run as grafana user (uid 472) — matches official image expectation
+securityContext:
+  runAsUser: 472
+  runAsGroup: 472
+
+ports:
+  - 3000
+
+persistence:
+  enabled: true
+  name: grafana-data
+  size: 1Gi
+  accessMode: ReadWriteOnce
+
+env:
+  - name: GF_SECURITY_ADMIN_PASSWORD
+    value: "admin"
+  - name: GF_AUTH_ANONYMOUS_ENABLED
+    value: "true"
+  - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+    value: "Admin"
+
+# grafana-data PVC comes from volumeClaimTemplates (persistence above)
+# datasources CM is mounted from the grafana-datasources ConfigMap
+volumeMounts:
+  - name: grafana-data
+    mountPath: /var/lib/grafana
+  - name: datasources
+    mountPath: /etc/grafana/provisioning/datasources
+
+volumes:
+  - name: datasources
+    configMap:
+      name: grafana-datasources
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  failureThreshold: 6
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 40
+  periodSeconds: 20
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000

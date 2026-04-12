@@ -17,8 +17,16 @@ spec:
     metadata:
       labels:
         app: {{ .Values.name }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
 
     spec:
+
+      {{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      {{- end }}
 
       {{- if .Values.initContainers }}
       initContainers:
@@ -47,13 +55,17 @@ spec:
             {{- end }}
           {{- end }}
 
-          # Global base env (injected for ALL Spring Boot services)
+          {{- if not .Values.skipGlobalEnv }}
+          # Global base env — injected for all Spring Boot services.
+          # Set skipGlobalEnv: true in values.yaml to skip (e.g. observability tools).
           env:
             - name: SPRING_RABBITMQ_HOST
               value: {{ .Values.global.rabbitmq.host | quote }}
 
             - name: JAVA_TOOL_OPTIONS
               {{- if or (eq .Values.name "keycloak") (eq .Values.name "keycloak-ui") }}
+              value: ""
+              {{- else if .Values.global.otel.skipJavaAgent }}
               value: ""
               {{- else }}
               value: {{ .Values.global.otel.javaAgent | quote }}
@@ -91,6 +103,14 @@ spec:
             {{- toYaml .Values.env | nindent 12 }}
             {{- end }}
 
+          {{- else }}
+          {{- /* skipGlobalEnv=true: only service-specific env vars, no Spring/OTEL injection */}}
+          {{- if .Values.env }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          {{- end }}
+          {{- end }}
+
           {{- if .Values.readinessProbe }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
@@ -110,5 +130,10 @@ spec:
           volumeMounts:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
           {{- end }}
+
+      {{- if .Values.volumes }}
+      volumes:
+        {{- toYaml .Values.volumes | nindent 8 }}
+      {{- end }}
 
 {{- end }}

@@ -1,0 +1,62 @@
+name: tempo
+skipGlobalEnv: true
+image: grafana/tempo:2.9.0
+replicaCount: 1
+
+args:
+  - -config.file=/etc/tempo-config.yml
+
+# Tempo listens on multiple ports:
+#   3100 = HTTP API / Grafana queries
+#   4318 = OTLP HTTP (receives traces from Java OTEL agent)
+ports:
+  - 3100
+  - 4318
+
+# Mount config CM; use emptyDir for trace block storage (dev-only)
+volumeMounts:
+  - name: config
+    mountPath: /etc/tempo-config.yml
+    subPath: tempo.yml
+  - name: tempo-data
+    mountPath: /tmp/tempo/blocks
+
+volumes:
+  - name: config
+    configMap:
+      name: tempo-config
+  - name: tempo-data
+    emptyDir: {}
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 3100
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  failureThreshold: 6
+
+livenessProbe:
+  httpGet:
+    path: /ready
+    port: 3100
+  initialDelaySeconds: 30
+  periodSeconds: 15
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3100
+      targetPort: 3100
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318

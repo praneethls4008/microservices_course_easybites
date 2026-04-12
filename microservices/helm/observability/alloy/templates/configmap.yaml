@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+data:
+  config.alloy: |
+    // ==========================
+    // 1. Discover Kubernetes pods
+    // ==========================
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    // ==========================
+    // 2. Add useful labels
+    // ==========================
+    discovery.relabel "pod_logs" {
+      targets = discovery.kubernetes.pods.targets
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        target_label  = "app"
+      }
+    }
+
+    // ==========================
+    // 3. Loki write endpoint
+    // ==========================
+    loki.write "default" {
+      endpoint {
+        url = "http://loki:3100/loki/api/v1/push"
+      }
+    }
+
+    // ==========================
+    // 4. Process logs — extract
+    //    trace_id, span_id, level
+    // ==========================
+    loki.process "k8s_logs" {
+
+      // Extract Spring MDC trace context: [service,traceId,spanId]
+      stage.regex {
+        expression = ".*\\[(?P<service>[^,]+),(?P<trace_id>[a-f0-9]+),(?P<span_id>[a-f0-9]+)\\]"
+      }
+
+      stage.labels {
+        values = {
+          trace_id = "trace_id",
+          span_id  = "span_id",
+          service  = "service",
+        }
+      }
+
+      // Extract log level
+      stage.regex {
+        expression = ".* (?P<level>INFO|ERROR|WARN|DEBUG) .*"
+      }
+
+      stage.labels {
+        values = {
+          level = "level",
+        }
+      }
+
+      stage.static_labels {
+        values = {
+          job = "kubernetes",
+        }
+      }
+
+      forward_to = [loki.write.default.receiver]
+    }
+
+    // ==========================
+    // 5. Stream pod logs → process
+    // ==========================
+    loki.source.kubernetes_logs "pods" {
+      targets    = discovery.relabel.pod_logs.output
+      forward_to = [loki.process.k8s_logs.receiver]
+    }

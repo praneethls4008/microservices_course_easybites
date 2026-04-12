@@ -42,3 +42,20 @@ configserver:
       - port: 8801
         targetPort: 8801
         nodePort: 30801
+
+# ── Observability: expose Grafana + Prometheus locally ────────────────────────
+grafana:
+  service:
+    type: NodePort
+    ports:
+      - port: 3000
+        targetPort: 3000
+        nodePort: 30300
+
+prometheus:
+  service:
+    type: NodePort
+    ports:
+      - port: 9090
+        targetPort: 9090
+        nodePort: 30909

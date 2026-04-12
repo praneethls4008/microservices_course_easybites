@@ -25,3 +25,43 @@ globalSecrets:
   keycloak:
     dbPassword: "keycloak"
     adminPassword: "admin"
+
+# ── Observability defaults (NodePort overrides live in environments/dev.yaml) ─
+prometheus:
+  service:
+    type: ClusterIP
+    ports:
+      - port: 9090
+        targetPort: 9090
+
+loki:
+  service:
+    type: ClusterIP
+    ports:
+      - port: 3100
+        targetPort: 3100
+
+tempo:
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3100
+        targetPort: 3100
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+
+alloy:
+  service:
+    type: ClusterIP
+    ports:
+      - port: 12345
+        targetPort: 12345
+
+grafana:
+  service:
+    type: ClusterIP
+    ports:
+      - port: 3000
+        targetPort: 3000

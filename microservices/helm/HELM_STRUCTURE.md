@@ -125,20 +125,3 @@ helm uninstall easybites-v1
 Remove-Item -Recurse -Force charts, Chart.lock
 
 .\scripts\build-all.ps1
-
-
-
-flow of commands:
-
-new:
-1.  .\scripts\build-all.ps1
-2. helm install easybites-v1 .\umbrella\ -f .\environments\dev.yaml
-
-update:
-1. helm update easybites-v1 .\umbrella\ -f .\environments\dev.yaml
-
-rebuild:
-1. helm uninstall easybites-v1
-2. .\scripts\build-all.ps1
-3. Remove-Item -Recurse -Force charts, Chart.lock
-4. helm install easybites-v1 .\umbrella\ -f .\environments\dev.yaml

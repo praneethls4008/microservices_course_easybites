@@ -1,0 +1,52 @@
+name: alloy
+skipGlobalEnv: true
+image: grafana/alloy:v1.7.5
+replicaCount: 1
+
+# Use ServiceAccount that has RBAC access to pod logs
+serviceAccountName: alloy
+
+args:
+  - run
+  - /etc/alloy/config.alloy
+
+# Mount config only — no docker socket needed in K8s
+volumeMounts:
+  - name: config
+    mountPath: /etc/alloy/config.alloy
+    subPath: config.alloy
+
+volumes:
+  - name: config
+    configMap:
+      name: alloy-config
+
+readinessProbe:
+  httpGet:
+    path: /-/ready
+    port: 12345
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 5
+
+livenessProbe:
+  httpGet:
+    path: /-/healthy
+    port: 12345
+  initialDelaySeconds: 20
+  periodSeconds: 15
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "300m"
+
+# Alloy HTTP UI — useful for debugging the pipeline
+service:
+  type: ClusterIP
+  ports:
+    - port: 12345
+      targetPort: 12345

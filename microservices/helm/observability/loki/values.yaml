@@ -1,0 +1,57 @@
+name: loki
+image: grafana/loki:3.0.0
+replicaCount: 1
+
+args:
+  - -config.file=/etc/loki/loki-config.yml
+
+ports:
+  - 3100
+
+persistence:
+  enabled: true
+  name: data
+  size: 2Gi
+  accessMode: ReadWriteOnce
+
+# Mount config CM + data PVC
+volumeMounts:
+  - name: data
+    mountPath: /loki
+  - name: config
+    mountPath: /etc/loki/loki-config.yml
+    subPath: loki-config.yml
+
+volumes:
+  - name: config
+    configMap:
+      name: loki-config
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 3100
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  failureThreshold: 6
+
+livenessProbe:
+  httpGet:
+    path: /ready
+    port: 3100
+  initialDelaySeconds: 40
+  periodSeconds: 15
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  ports:
+    - port: 3100
+      targetPort: 3100

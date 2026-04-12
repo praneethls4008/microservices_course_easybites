@@ -117,6 +117,11 @@ spec:
         {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
 
+      {{- if .Values.volumes }}
+      volumes:
+        {{- toYaml .Values.volumes | nindent 8 }}
+      {{- end }}
+
   {{- /* SAFE persistence handling */}}
   {{- if (and .Values.persistence (ne (default true .Values.persistence.enabled) false)) }}
   volumeClaimTemplates:
