@@ -2,58 +2,12 @@ name: alloy
 skipGlobalEnv: true
 image: grafana/alloy:v1.7.5
 replicaCount: 1
-serviceAccountName: alloy
 
-# Force root user to ensure permission to read /var/log/pods
-securityContext:
-  runAsUser: 0
+serviceAccountName: alloy
 
 args:
   - run
   - /etc/alloy/config.alloy
-
-volumeMounts:
-  - name: config
-    mountPath: /etc/alloy/config.alloy
-    subPath: config.alloy
-
-  - name: pod-logs
-    mountPath: /var/log/pods
-    readOnly: true
-
-  # ADD THIS (CRITICAL)
-  - name: container-logs
-    mountPath: /var/log/containers
-    readOnly: true
-
-volumes:
-  - name: config
-    configMap:
-      name: alloy-config
-
-  - name: pod-logs
-    hostPath:
-      path: /var/log/pods
-
-  # ADD THIS (CRITICAL)
-  - name: container-logs
-    hostPath:
-      path: /var/log/containers
-
-readinessProbe:
-  httpGet:
-    path: /-/ready
-    port: 12345
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  failureThreshold: 5
-
-livenessProbe:
-  httpGet:
-    path: /-/healthy
-    port: 12345
-  initialDelaySeconds: 20
-  periodSeconds: 15
 
 resources:
   requests:
@@ -63,7 +17,6 @@ resources:
     memory: "256Mi"
     cpu: "300m"
 
-# Alloy HTTP UI  useful for debugging the pipeline
 service:
   type: ClusterIP
   ports:

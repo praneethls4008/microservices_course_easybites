@@ -17,7 +17,9 @@ spec:
         app: {{ .Values.name }}
 
     spec:
+      {{- if .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
+      {{- end }}
 
       containers:
         - name: {{ .Values.name }}
@@ -27,32 +29,16 @@ spec:
           args:
             {{- toYaml .Values.args | nindent 12 }}
 
-          securityContext:
-            runAsUser: 0
+          ports:
+            - containerPort: 12345
 
           volumeMounts:
             - name: config
               mountPath: /etc/alloy/config.alloy
               subPath: config.alloy
 
-            - name: containers
-              mountPath: /var/log/containers
-              readOnly: true
-
-            - name: pods
-              mountPath: /var/log/pods
-              readOnly: true
-
       volumes:
         - name: config
           configMap:
             name: alloy-config
-
-        - name: containers
-          hostPath:
-            path: /var/log/containers
-
-        - name: pods
-          hostPath:
-            path: /var/log/pods
 {{- end }}
