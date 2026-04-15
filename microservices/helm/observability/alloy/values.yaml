@@ -16,19 +16,29 @@ volumeMounts:
   - name: config
     mountPath: /etc/alloy/config.alloy
     subPath: config.alloy
-  # --- FIX: ADD THIS MOUNT ---
+
   - name: pod-logs
     mountPath: /var/log/pods
+    readOnly: true
+
+  # ADD THIS (CRITICAL)
+  - name: container-logs
+    mountPath: /var/log/containers
     readOnly: true
 
 volumes:
   - name: config
     configMap:
       name: alloy-config
-  # --- FIX: ADD THIS VOLUME ---
+
   - name: pod-logs
     hostPath:
       path: /var/log/pods
+
+  # ADD THIS (CRITICAL)
+  - name: container-logs
+    hostPath:
+      path: /var/log/containers
 
 readinessProbe:
   httpGet:
@@ -53,7 +63,7 @@ resources:
     memory: "256Mi"
     cpu: "300m"
 
-# Alloy HTTP UI — useful for debugging the pipeline
+# Alloy HTTP UI  useful for debugging the pipeline
 service:
   type: ClusterIP
   ports:
