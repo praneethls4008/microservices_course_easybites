@@ -36,6 +36,18 @@ data:
         source_labels = ["__meta_kubernetes_pod_label_app"]
         target_label  = "app"
       }
+    
+      // ... (keep sections 1 and 2 as they are)
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name", "__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+        separator     = "_"
+        action        = "replace"
+        // Minikube uses: /var/log/pods/<namespace>_<podname>_<uid>/<container>/*.log
+        replacement   = "/var/log/pods/${3}_${4}_${1}/${2}/*.log"
+        target_label  = "__path__"
+      }
+    
     }
 
     // ==========================
@@ -89,7 +101,9 @@ data:
     // ==========================
     // 5. Stream pod logs → process
     // ==========================
-    loki.source.kubernetes_logs "pods" {
+    loki.source.file "pods" {
       targets    = discovery.relabel.pod_logs.output
       forward_to = [loki.process.k8s_logs.receiver]
     }
+    
+    

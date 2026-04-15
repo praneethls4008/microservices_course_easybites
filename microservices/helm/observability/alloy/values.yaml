@@ -2,24 +2,33 @@ name: alloy
 skipGlobalEnv: true
 image: grafana/alloy:v1.7.5
 replicaCount: 1
-
-# Use ServiceAccount that has RBAC access to pod logs
 serviceAccountName: alloy
+
+# Force root user to ensure permission to read /var/log/pods
+securityContext:
+  runAsUser: 0
 
 args:
   - run
   - /etc/alloy/config.alloy
 
-# Mount config only — no docker socket needed in K8s
 volumeMounts:
   - name: config
     mountPath: /etc/alloy/config.alloy
     subPath: config.alloy
+  # --- FIX: ADD THIS MOUNT ---
+  - name: pod-logs
+    mountPath: /var/log/pods
+    readOnly: true
 
 volumes:
   - name: config
     configMap:
       name: alloy-config
+  # --- FIX: ADD THIS VOLUME ---
+  - name: pod-logs
+    hostPath:
+      path: /var/log/pods
 
 readinessProbe:
   httpGet:

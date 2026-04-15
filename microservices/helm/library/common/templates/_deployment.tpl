@@ -35,6 +35,10 @@ spec:
 
       containers:
         - name: {{ .Values.name }}
+          {{- if .Values.securityContext }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
 

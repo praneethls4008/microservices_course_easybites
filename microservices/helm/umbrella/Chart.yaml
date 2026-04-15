@@ -31,9 +31,9 @@ dependencies:
     version: 1.0.0
     repository: "file://../infrastructure/keycloak"
 
-  - name: keycloak-ui
-    version: 1.0.0
-    repository: "file://../infrastructure/keycloak-ui"
+#  - name: keycloak-ui
+#    version: 1.0.0
+#    repository: "file://../infrastructure/keycloak-ui"
 
   # ── Platform ──────────────────────────────────────────────────────────────
   - name: configserver
@@ -49,34 +49,34 @@ dependencies:
     repository: "file://../platform/gatewayserver"
 
   # ── Databases ─────────────────────────────────────────────────────────────
-  - name: accountsdb
-    version: 1.0.0
-    repository: "file://../databases/accountsdb"
-
-  - name: cardsdb
-    version: 1.0.0
-    repository: "file://../databases/cardsdb"
+#  - name: accountsdb
+#    version: 1.0.0
+#    repository: "file://../databases/accountsdb"
+#
+#  - name: cardsdb
+#    version: 1.0.0
+#    repository: "file://../databases/cardsdb"
 
   - name: loansdb
     version: 1.0.0
     repository: "file://../databases/loansdb"
 
   # ── Microservices ─────────────────────────────────────────────────────────
-  - name: accounts
-    version: 1.0.0
-    repository: "file://../microservices/accounts"
-
-  - name: cards
-    version: 1.0.0
-    repository: "file://../microservices/cards"
+#  - name: accounts
+#    version: 1.0.0
+#    repository: "file://../microservices/accounts"
+#
+#  - name: cards
+#    version: 1.0.0
+#    repository: "file://../microservices/cards"
 
   - name: loans
     version: 1.0.0
     repository: "file://../microservices/loans"
 
-  - name: message
-    version: 1.0.0
-    repository: "file://../microservices/message"
+#  - name: message
+#    version: 1.0.0
+#    repository: "file://../microservices/message"
 
   # ── Observability ─────────────────────────────────────────────────────────
   - name: prometheus
