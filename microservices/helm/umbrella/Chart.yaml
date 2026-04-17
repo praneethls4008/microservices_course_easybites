@@ -40,35 +40,35 @@ dependencies:
     version: 1.0.0
     repository: "file://../platform/configserver"
 
-  - name: eurekaserver
-    version: 1.0.0
-    repository: "file://../platform/eurekaserver"
+#  - name: eurekaserver
+#    version: 1.0.0
+#    repository: "file://../platform/eurekaserver"
 
   - name: gatewayserver
     version: 1.0.0
     repository: "file://../platform/gatewayserver"
 
   # ── Databases ─────────────────────────────────────────────────────────────
-#  - name: accountsdb
-#    version: 1.0.0
-#    repository: "file://../databases/accountsdb"
-#
-#  - name: cardsdb
-#    version: 1.0.0
-#    repository: "file://../databases/cardsdb"
+  - name: accountsdb
+    version: 1.0.0
+    repository: "file://../databases/accountsdb"
+
+  - name: cardsdb
+    version: 1.0.0
+    repository: "file://../databases/cardsdb"
 
   - name: loansdb
     version: 1.0.0
     repository: "file://../databases/loansdb"
 
   # ── Microservices ─────────────────────────────────────────────────────────
-#  - name: accounts
-#    version: 1.0.0
-#    repository: "file://../microservices/accounts"
-#
-#  - name: cards
-#    version: 1.0.0
-#    repository: "file://../microservices/cards"
+  - name: accounts
+    version: 1.0.0
+    repository: "file://../microservices/accounts"
+
+  - name: cards
+    version: 1.0.0
+    repository: "file://../microservices/cards"
 
   - name: loans
     version: 1.0.0
@@ -79,22 +79,22 @@ dependencies:
 #    repository: "file://../microservices/message"
 
   # ── Observability ─────────────────────────────────────────────────────────
-  - name: prometheus
-    version: 1.0.0
-    repository: "file://../observability/prometheus"
-
-  - name: loki
-    version: 1.0.0
-    repository: "file://../observability/loki"
-
-  - name: tempo
-    version: 1.0.0
-    repository: "file://../observability/tempo"
-
-  - name: alloy
-    version: 1.0.0
-    repository: "file://../observability/alloy"
-
-  - name: grafana
-    version: 1.0.0
-    repository: "file://../observability/grafana"
+#  - name: prometheus
+#    version: 1.0.0
+#    repository: "file://../observability/prometheus"
+#
+#  - name: loki
+#    version: 1.0.0
+#    repository: "file://../observability/loki"
+#
+#  - name: tempo
+#    version: 1.0.0
+#    repository: "file://../observability/tempo"
+#
+#  - name: alloy
+#    version: 1.0.0
+#    repository: "file://../observability/alloy"
+#
+#  - name: grafana
+#    version: 1.0.0
+#    repository: "file://../observability/grafana"

@@ -13,9 +13,14 @@ global:
   ports:
     configserver: 8801
 
-  eureka:
-    hostname: eurekaserver
-    url: http://eurekaserver:8761/eureka/
+  discovery-server-url: "http://spring-cloud-kubernetes.discoverserver:80/"
+
+
+#  eureka:
+#    hostname: eurekaserver
+#    url: http://eurekaserver:8761/eureka/
+
+
 
 # ── Secret defaults (overridable per environment) ────────────────────────────
 # For production, swap these out with sealed-secrets or an external vault.

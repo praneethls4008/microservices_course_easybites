@@ -34,6 +34,7 @@ env:
   - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
     value: "kafka:8902"
 
+
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness

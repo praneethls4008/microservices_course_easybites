@@ -17,6 +17,17 @@ build_helm_deps() {
     cd ..
 }
 
+# --- NEW SECTION: APPLY DISCOVERY SERVER ---
+echo "Step 0: Applying Discovery Server Manifests..."
+# This assumes you saved that YAML as ./discover-server/kubernetes-discoveryserver.yml
+# This assumes you saved that YAML as ./discover-server/kubernetes-discoveryserver.yml
+if [ -f "./discover-server/kubernetes-discoveryserver.yml" ]; then
+    kubectl apply -f ./discover-server/kubernetes-discoveryserver.yml
+else
+    echo "Warning: ./discover-server/kubernetes-discoveryserver.yml not found, skipping apply."
+fi
+# -------------------------------------------
+
 echo "Building Helm dependencies..."
 
 build_helm_deps "observability"
