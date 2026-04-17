@@ -36,6 +36,9 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
+    kubernetes:
+      discovery:
+        all-namespaces: true
 
   sql:
     init:
@@ -64,15 +67,15 @@ management:
     logs:
       application: ${spring.application.name}
 
-eureka:
-  instance:
-    preferIpAddress: true
-  client:
-    fetchRegistry: true
-    registerWithEureka: true
-    serviceUrl:
-      # Use the variable defined in common-config
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8070/eureka/}
+#eureka:
+#  instance:
+#    preferIpAddress: true
+#  client:
+#    fetchRegistry: true
+#    registerWithEureka: true
+#    serviceUrl:
+#      # Use the variable defined in common-config
+#      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8070/eureka/}
 
 info:
   app:

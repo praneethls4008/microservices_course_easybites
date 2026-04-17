@@ -22,14 +22,18 @@ public class GatewayConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder, RedisRateLimiter redisRateLimiter, KeyResolver keyResolver){
         return routeLocatorBuilder.routes()
-                .route("accounts_route", r -> r
+                .route("accounts_route",  r -> r
                         .path("/accounts/**")
                         .filters(f -> f.rewritePath("/accounts/(?<segment>.*)", "/${segment}")
                                 .circuitBreaker(config -> config.setName("accountsCircuitBreaker")
                                         .setFallbackUri("forward:/default")
                                 )
                         )
-                        .uri("lb://ACCOUNTS"))
+//                        .uri("lb://ACCOUNTS") client side load balancing
+                        .uri("http://accounts:40001")
+
+                )
+
 
 
                 .route("cards_route", r -> r
@@ -39,7 +43,9 @@ public class GatewayConfig {
 //                                        .setFallbackUri("forward:/default")
 //                                )
                         )
-                        .uri("lb://CARDS"))
+//                        .uri("lb://CARDS")  client side load balancing
+                        .uri("http://cards:40002")
+                )
 
                 .route("loans_route", r -> r
                         .path("/loans/**")
@@ -54,7 +60,9 @@ public class GatewayConfig {
                                         .setKeyResolver(keyResolver)
                                 )
                         )
-                        .uri("lb://LOANS"))
+//                        .uri("lb://LOANS")  client side load balancing
+                        .uri("http://loans:40003")
+                )
                 .build();
     }
 

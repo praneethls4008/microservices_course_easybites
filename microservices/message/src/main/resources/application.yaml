@@ -7,6 +7,9 @@ spring:
   config:
     import: "optional:configserver:http://configserver:8801"
   cloud:
+    kubernetes:
+      discovery:
+        all-namespaces: true
     function:
       definition: email|sms
     stream:
@@ -49,15 +52,15 @@ logging:
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
-eureka:
-  instance:
-    preferIpAddress: true
-  client:
-    fetchRegistry: true
-    registerWithEureka: true
-    serviceUrl:
-      # Use the variable defined in common-config
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8070/eureka/}
+#eureka:
+#  instance:
+#    preferIpAddress: true
+#  client:
+#    fetchRegistry: true
+#    registerWithEureka: true
+#    serviceUrl:
+#      # Use the variable defined in common-config
+#      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8070/eureka/}
 
 info:
   app:
