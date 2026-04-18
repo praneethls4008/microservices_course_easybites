@@ -73,13 +73,13 @@ spec:
               value: "none"
             - name: OTEL_LOGS_EXPORTER
               value: "none"
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              value: {{ index .Values.global "discovery-server-url" | quote }}
             {{- if ne .Values.type "configserver" }}
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.global.spring.profile | quote }}
             - name: SPRING_CONFIG_IMPORT
               value: {{ printf "configserver:http://configserver:%v/" (index .Values.global.ports "configserver") | quote }}
-            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
-              value: {{ index .Values.global "discovery-server-url" | quote }}
             {{- end }}
             {{- if .Values.env }}
             {{- toYaml .Values.env | nindent 12 }}

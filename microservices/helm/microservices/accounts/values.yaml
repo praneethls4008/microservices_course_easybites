@@ -10,12 +10,12 @@ initContainers:
   - name: wait-for-configserver
     image: busybox
     command: ["sh", "-c", "until nc -z configserver 8801; do echo waiting for configserver; sleep 2; done;"]
-  - name: wait-for-eureka
-    image: busybox
-    command: ["sh", "-c", "until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;"]
   - name: wait-for-accountsdb
     image: busybox
     command: ["sh", "-c", "until nc -z accountsdb 3306; do echo waiting for accountsdb; sleep 2; done;"]
+#  - name: wait-for-eureka
+#    image: busybox
+#    command: [ "sh", "-c", "until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;" ]
 
 env:
   - name: SPRING_APPLICATION_NAME

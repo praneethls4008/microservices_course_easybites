@@ -15,13 +15,6 @@ initContainers:
       - -c
       - until nc -z configserver 8801; do echo waiting for configserver; sleep 2; done;
 
-  - name: wait-for-eureka
-    image: busybox
-    command:
-      - sh
-      - -c
-      - until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;
-
   - name: wait-for-redis
     image: busybox
     command:
@@ -35,6 +28,13 @@ initContainers:
       - sh
       - -c
       - until nc -z keycloak 8080; do echo waiting for keycloak; sleep 2; done;
+
+#  - name: wait-for-eureka
+#    image: busybox
+#    command:
+#      - sh
+#      - -c
+#      - until nc -z eurekaserver 8761; do echo waiting for eureka; sleep 2; done;
 
 # 🔥 SERVICE-SPECIFIC ENV ONLY
 env:

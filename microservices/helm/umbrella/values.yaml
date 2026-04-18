@@ -1,5 +1,6 @@
 global:
 
+  discovery-server-url: "http://discoveryserver:80/"
   rabbitmq:
     host: rabbitmq
 
@@ -12,8 +13,6 @@ global:
 
   ports:
     configserver: 8801
-
-  discovery-server-url: "http://spring-cloud-kubernetes.discoverserver:80/"
 
 
 #  eureka:
