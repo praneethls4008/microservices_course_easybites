@@ -1,6 +1,8 @@
 # --- Stage 1: Build Stage ---
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
+ENV MAVEN_OPTS="-Djava.net.preferIPv4Stack=true -Djdk.tls.client.protocols=TLSv1.2"
+ENV MAVEN_OPTS="-Djava.net.preferIPv4Stack=true -Djdk.tls.client.protocols=TLSv1.2"
 
 # Install curl
 RUN apt-get update && apt-get install -y curl
@@ -19,13 +21,14 @@ RUN mvn clean package -DskipTests
 # --- Stage 2: Runtime Stage ---
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+ENV MAVEN_OPTS="-Djava.net.preferIPv4Stack=true -Djdk.tls.client.protocols=TLSv1.2"
 
 RUN mkdir -p /app/libs \
  && addgroup -S spring \
  && adduser -S spring -G spring
 
 COPY --from=build /app/target/*.jar app.jar
-COPY --from=build /app/opentelemetry-javaagent.jar /app/libs/opentelemetry-javaagent.jar
+#COPY --from=build /app/opentelemetry-javaagent.jar /app/libs/opentelemetry-javaagent.jar
 
 RUN chown -R spring:spring /app
 
